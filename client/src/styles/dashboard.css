@@ -110,10 +110,38 @@
 .dash-side-foot {
   padding-top: 16px;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: auto;
+}
+
+.dash-account {
+  position: relative;
+}
+
+.dash-account-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 8px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--d-sans);
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.dash-account-trigger:hover,
+.dash-account.is-open .dash-account-trigger {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
 }
 
 .dash-user {
-  padding: 0 8px 12px;
+  flex: 1;
+  min-width: 0;
   font-size: 13px;
 }
 
@@ -122,28 +150,72 @@
   color: #fff;
   font-weight: 500;
   margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .dash-user span {
+  display: block;
   color: #7d91ac;
   font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.dash-logout {
+.dash-account-chevron {
+  flex-shrink: 0;
+  color: #7d91ac;
+  transition: transform 0.18s ease;
+}
+
+.dash-account-chevron.open {
+  transform: rotate(180deg);
+  color: var(--d-gold-bright);
+}
+
+.dash-account-menu {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(100% + 8px);
+  display: grid;
+  gap: 2px;
+  padding: 6px;
+  background: #0a2548;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 10px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
+  z-index: 20;
+}
+
+.dash-account-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   width: 100%;
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  color: #c5d2e3;
-  border-radius: 7px;
   padding: 10px 12px;
-  font-size: 13px;
-  cursor: pointer;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: #c5d2e3;
   font-family: var(--d-sans);
+  font-size: 13.5px;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  text-align: left;
 }
 
-.dash-logout:hover {
-  border-color: rgba(255, 255, 255, 0.35);
+.dash-account-item:hover {
+  background: rgba(255, 255, 255, 0.08);
   color: #fff;
+}
+
+.dash-account-item.danger:hover {
+  background: rgba(139, 43, 34, 0.28);
+  color: #f3c7c2;
 }
 
 .dash-main {

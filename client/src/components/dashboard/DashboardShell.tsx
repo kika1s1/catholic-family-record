@@ -1,15 +1,27 @@
-import { useEffect, useState } from "react";
-import { NavLink, Outlet, useLocation } from "react-router-dom";
-import { ExternalLink, LayoutDashboard, Menu, UserRound, Users, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
+import {
+  ChevronUp,
+  ExternalLink,
+  LayoutDashboard,
+  LogOut,
+  Menu,
+  UserRound,
+  Users,
+  X,
+} from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 
 export function DashboardShell() {
   const { user, logout } = useAuth();
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
+  const accountRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setMenuOpen(false);
+    setAccountOpen(false);
   }, [location.pathname]);
 
   useEffect(() => {
@@ -38,6 +50,26 @@ export function DashboardShell() {
     mq.addEventListener("change", onChange);
     return () => mq.removeEventListener("change", onChange);
   }, []);
+
+  useEffect(() => {
+    if (!accountOpen) return;
+
+    const onPointerDown = (event: MouseEvent) => {
+      if (!accountRef.current?.contains(event.target as Node)) {
+        setAccountOpen(false);
+      }
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setAccountOpen(false);
+    };
+
+    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [accountOpen]);
 
   return (
     <div className={`dash-app${menuOpen ? " menu-open" : ""}`}>
@@ -80,24 +112,57 @@ export function DashboardShell() {
             <Users size={16} />
             Inquiries
           </NavLink>
-          <NavLink to="/dashboard/profile">
-            <UserRound size={16} />
-            Profile
-          </NavLink>
           <a href="/" target="_blank" rel="noreferrer">
             <ExternalLink size={16} />
             View landing
           </a>
         </nav>
 
-        <div className="dash-side-foot">
-          <div className="dash-user">
-            <strong>{user?.name}</strong>
-            <span>{user?.email}</span>
+        <div className="dash-side-foot" ref={accountRef}>
+          <div className={`dash-account${accountOpen ? " is-open" : ""}`}>
+            {accountOpen ? (
+              <div className="dash-account-menu" role="menu">
+                <Link
+                  to="/dashboard/profile"
+                  role="menuitem"
+                  className="dash-account-item"
+                  onClick={() => setAccountOpen(false)}
+                >
+                  <UserRound size={15} />
+                  Profile
+                </Link>
+                <button
+                  type="button"
+                  role="menuitem"
+                  className="dash-account-item danger"
+                  onClick={() => {
+                    setAccountOpen(false);
+                    void logout();
+                  }}
+                >
+                  <LogOut size={15} />
+                  Sign out
+                </button>
+              </div>
+            ) : null}
+
+            <button
+              type="button"
+              className="dash-account-trigger"
+              aria-expanded={accountOpen}
+              aria-haspopup="menu"
+              onClick={() => setAccountOpen((v) => !v)}
+            >
+              <span className="dash-user">
+                <strong>{user?.name}</strong>
+                <span>{user?.email}</span>
+              </span>
+              <ChevronUp
+                size={16}
+                className={`dash-account-chevron${accountOpen ? " open" : ""}`}
+              />
+            </button>
           </div>
-          <button type="button" className="dash-logout" onClick={() => void logout()}>
-            Sign out
-          </button>
         </div>
       </aside>
 
