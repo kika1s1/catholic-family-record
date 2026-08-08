@@ -22,8 +22,7 @@
 
 .dash-app {
   min-height: 100vh;
-  display: grid;
-  grid-template-columns: var(--d-sidebar) 1fr;
+  min-height: 100dvh;
   background:
     radial-gradient(1200px 500px at 100% -10%, rgba(217, 180, 74, 0.08), transparent 55%),
     linear-gradient(180deg, #f7f5f0 0%, var(--d-paper) 40%, #efebe3 100%);
@@ -32,15 +31,22 @@
 }
 
 .dash-sidebar {
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  bottom: 0;
+  width: var(--d-sidebar);
   height: 100vh;
+  height: 100dvh;
+  z-index: 50;
   background: var(--d-navy-deep);
   color: #c5d2e3;
   padding: 28px 18px;
   display: flex;
   flex-direction: column;
   border-right: 1px solid rgba(255, 255, 255, 0.06);
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .dash-brand {
@@ -142,6 +148,9 @@
 
 .dash-main {
   min-width: 0;
+  margin-left: var(--d-sidebar);
+  min-height: 100vh;
+  min-height: 100dvh;
   padding: 28px 32px 48px;
 }
 
@@ -915,10 +924,6 @@ body.dash-nav-lock {
 }
 
 @media (max-width: 960px) {
-  .dash-app {
-    grid-template-columns: 1fr;
-  }
-
   .dash-mobile-bar {
     display: flex;
     align-items: center;
@@ -995,6 +1000,7 @@ body.dash-nav-lock {
   }
 
   .dash-main {
+    margin-left: 0;
     padding: 18px 14px 40px;
     width: 100%;
     min-width: 0;
