@@ -79,6 +79,59 @@ export function verifyToken(token: string): AuthUser | null {
   }
 }
 
+export function getUserById(id: string): UserRow | undefined {
+  return db.prepare("SELECT * FROM users WHERE id = ?").get(id) as
+    | UserRow
+    | undefined;
+}
+
+export function updateUserName(id: string, name: string): AuthUser {
+  const trimmed = name.trim();
+  if (!trimmed) {
+    throw new Error("Name is required");
+  }
+  if (trimmed.length > 120) {
+    throw new Error("Name must be 120 characters or fewer");
+  }
+
+  const existing = getUserById(id);
+  if (!existing) {
+    throw new Error("User not found");
+  }
+
+  db.prepare("UPDATE users SET name = ? WHERE id = ?").run(trimmed, id);
+  return toAuthUser(getUserById(id)!);
+}
+
+export function changeUserPassword(
+  id: string,
+  currentPassword: string,
+  newPassword: string,
+): void {
+  const existing = getUserById(id);
+  if (!existing) {
+    throw new Error("User not found");
+  }
+
+  if (!bcrypt.compareSync(currentPassword, existing.password_hash)) {
+    throw new Error("Current password is incorrect");
+  }
+
+  if (newPassword.length < 12) {
+    throw new Error("New password must be at least 12 characters");
+  }
+
+  if (currentPassword === newPassword) {
+    throw new Error("New password must be different from the current password");
+  }
+
+  const passwordHash = bcrypt.hashSync(newPassword, 12);
+  db.prepare("UPDATE users SET password_hash = ? WHERE id = ?").run(
+    passwordHash,
+    id,
+  );
+}
+
 function toAuthUser(row: UserRow): AuthUser {
   return {
     id: row.id,

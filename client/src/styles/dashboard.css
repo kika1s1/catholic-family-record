@@ -811,6 +811,55 @@
   font-size: 14px;
 }
 
+.profile-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  align-items: start;
+}
+
+.profile-card {
+  background: var(--d-surface);
+  border: 1px solid var(--d-rule);
+  border-radius: var(--d-radius);
+  box-shadow: var(--d-shadow);
+  padding: 22px 20px 20px;
+}
+
+.profile-card h3 {
+  font-family: var(--d-serif);
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--d-navy);
+  margin: 0 0 4px;
+}
+
+.profile-card .login-btn {
+  max-width: 220px;
+}
+
+.profile-card input:disabled {
+  background: #f4f1ea;
+  color: var(--d-muted);
+  cursor: not-allowed;
+}
+
+.profile-ok {
+  margin-top: 12px;
+  color: var(--d-green);
+  font-size: 13.5px;
+}
+
+@media (max-width: 900px) {
+  .profile-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-card .login-btn {
+    max-width: none;
+  }
+}
+
 .dash-mobile-bar {
   display: none;
 }

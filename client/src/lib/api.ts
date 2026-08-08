@@ -79,6 +79,22 @@ export const api = {
 
   me: () => request<{ user: AuthUser }>("/api/auth/me"),
 
+  updateProfile: (name: string) =>
+    request<{ user: AuthUser }>("/api/auth/profile", {
+      method: "PATCH",
+      body: JSON.stringify({ name }),
+    }),
+
+  changePassword: (payload: {
+    currentPassword: string;
+    newPassword: string;
+    confirmPassword: string;
+  }) =>
+    request<{ ok: boolean; message: string }>("/api/auth/password", {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    }),
+
   analytics: () => request<DashboardAnalytics>("/api/analytics/dashboard"),
 
   leads: (params?: { status?: string; role?: string; q?: string }) => {

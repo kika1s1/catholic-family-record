@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
-import { ExternalLink, LayoutDashboard, Menu, Users, X } from "lucide-react";
+import { ExternalLink, LayoutDashboard, Menu, UserRound, Users, X } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 
 export function DashboardShell() {
@@ -79,6 +79,10 @@ export function DashboardShell() {
           <NavLink to="/dashboard/leads">
             <Users size={16} />
             Inquiries
+          </NavLink>
+          <NavLink to="/dashboard/profile">
+            <UserRound size={16} />
+            Profile
           </NavLink>
           <a href="/" target="_blank" rel="noreferrer">
             <ExternalLink size={16} />
