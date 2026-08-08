@@ -44,6 +44,19 @@ fi
 
 PORT="$(grep -E '^PORT=' server/.env | cut -d= -f2- || echo 4000)"
 echo "==> Health"
-curl -fsS "http://127.0.0.1:${PORT}/api/health"
-echo
+ok=0
+for i in 1 2 3 4 5 6 7 8 9 10; do
+  if curl -fsS "http://127.0.0.1:${PORT}/api/health" >/tmp/cfr-health.json 2>/dev/null; then
+    cat /tmp/cfr-health.json
+    echo
+    ok=1
+    break
+  fi
+  sleep 1
+done
+if [[ "$ok" != "1" ]]; then
+  echo "Health check failed"
+  pm2 logs cfr --lines 40 --nostream || true
+  exit 1
+fi
 echo "==> Remote deploy complete"
