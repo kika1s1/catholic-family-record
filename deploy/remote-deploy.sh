@@ -11,7 +11,7 @@ if [[ ! -f server/.env ]]; then
 fi
 
 echo "==> Install dependencies"
-npm ci --omit=dev
+npm ci
 npm ci --prefix client
 npm ci --prefix server
 
