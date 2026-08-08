@@ -830,8 +830,14 @@
   max-width: 100%;
 }
 
+html {
+  scrollbar-gutter: stable;
+}
+
 body.dash-nav-lock {
   overflow: hidden;
+  touch-action: none;
+  padding-right: var(--dash-lock-gap, 0px);
 }
 
 @media (max-width: 1280px) {

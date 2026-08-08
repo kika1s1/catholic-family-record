@@ -17,16 +17,32 @@ export default function LandingPage() {
   const [navOpen, setNavOpen] = useState(false)
 
   useEffect(() => {
-    document.body.classList.toggle('nav-lock', navOpen)
-    return () => document.body.classList.remove('nav-lock')
+    if (!navOpen) {
+      document.body.classList.remove('nav-lock')
+      document.body.style.removeProperty('--nav-lock-gap')
+      return
+    }
+
+    // Compensating for the scrollbar width prevents the viewport from growing
+    // when overflow is locked — that growth was flipping past 1024px and hiding the hamburger.
+    const gap = Math.max(0, window.innerWidth - document.documentElement.clientWidth)
+    document.body.style.setProperty('--nav-lock-gap', `${gap}px`)
+    document.body.classList.add('nav-lock')
+
+    return () => {
+      document.body.classList.remove('nav-lock')
+      document.body.style.removeProperty('--nav-lock-gap')
+    }
   }, [navOpen])
 
   useEffect(() => {
-    const onResize = () => {
-      if (window.innerWidth > 1024) setNavOpen(false)
+    const mq = window.matchMedia('(max-width: 1024px)')
+    const onChange = () => {
+      if (!mq.matches) setNavOpen(false)
     }
-    window.addEventListener('resize', onResize)
-    return () => window.removeEventListener('resize', onResize)
+    onChange()
+    mq.addEventListener('change', onChange)
+    return () => mq.removeEventListener('change', onChange)
   }, [])
 
   function closeNav() {

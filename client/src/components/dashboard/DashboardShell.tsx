@@ -13,16 +13,30 @@ export function DashboardShell() {
   }, [location.pathname]);
 
   useEffect(() => {
-    document.body.classList.toggle("dash-nav-lock", menuOpen);
-    return () => document.body.classList.remove("dash-nav-lock");
+    if (!menuOpen) {
+      document.body.classList.remove("dash-nav-lock");
+      document.body.style.removeProperty("--dash-lock-gap");
+      return;
+    }
+
+    const gap = Math.max(0, window.innerWidth - document.documentElement.clientWidth);
+    document.body.style.setProperty("--dash-lock-gap", `${gap}px`);
+    document.body.classList.add("dash-nav-lock");
+
+    return () => {
+      document.body.classList.remove("dash-nav-lock");
+      document.body.style.removeProperty("--dash-lock-gap");
+    };
   }, [menuOpen]);
 
   useEffect(() => {
-    const onResize = () => {
-      if (window.innerWidth > 960) setMenuOpen(false);
+    const mq = window.matchMedia("(max-width: 960px)");
+    const onChange = () => {
+      if (!mq.matches) setMenuOpen(false);
     };
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
+    onChange();
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
   }, []);
 
   return (
