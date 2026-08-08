@@ -22,7 +22,14 @@ export function createApp() {
   app.use(helmet({ contentSecurityPolicy: false }));
   app.use(
     cors({
-      origin: env.clientOrigin,
+      origin(origin, callback) {
+        // Same-origin requests and non-browser clients may omit Origin
+        if (!origin || env.clientOrigins.includes(origin)) {
+          callback(null, true);
+          return;
+        }
+        callback(null, false);
+      },
       credentials: true,
     }),
   );

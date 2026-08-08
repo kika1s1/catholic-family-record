@@ -32,6 +32,26 @@ npm run dev                    # API :4000 · Vite :5173
 
 Admin credentials come only from `server/.env` (`ADMIN_EMAIL` / `ADMIN_PASSWORD`). They are never shown in the UI.
 
+## Domain: www.catholicfamilyrecord.com
+
+Point DNS at the VPS (`67.205.132.40`) in IONOS (ui-dns):
+
+| Type | Name | Value |
+|------|------|--------|
+| A | `@` | `67.205.132.40` |
+| A | `www` | `67.205.132.40` |
+
+Remove any parking A/AAAA records that still point at IONOS (`74.208.236.224`).
+
+After DNS propagates:
+
+```bash
+ssh root@67.205.132.40
+bash /opt/catholic-family-record/deploy/enable-ssl.sh
+```
+
+That issues Let's Encrypt certs and sets `CLIENT_ORIGIN` / `COOKIE_SECURE` for HTTPS.
+
 ## VPS deployment
 
 ### 1. Server packages

@@ -44,18 +44,31 @@ function loadEnv() {
         ? false
         : isProd;
 
+  const clientOriginRaw = required(
+    "CLIENT_ORIGIN",
+    isProd ? undefined : "http://localhost:5173",
+  );
+  const clientOrigins = clientOriginRaw
+    .split(",")
+    .map((o) => o.trim().replace(/\/$/, ""))
+    .filter(Boolean);
+
+  if (!clientOrigins.length) {
+    throw new Error("CLIENT_ORIGIN must include at least one origin");
+  }
+
   return {
     port: Number(process.env.PORT ?? 4000),
-    clientOrigin: required(
-      "CLIENT_ORIGIN",
-      isProd ? undefined : "http://localhost:5173",
-    ),
+    /** Primary origin (first entry) */
+    clientOrigin: clientOrigins[0],
+    /** All allowed CORS origins (comma-separated CLIENT_ORIGIN) */
+    clientOrigins,
     jwtSecret,
     adminEmail: required("ADMIN_EMAIL", "admin@example.com"),
     adminPassword,
     nodeEnv: process.env.NODE_ENV ?? "development",
     isProd,
-    /** Set COOKIE_SECURE=false for HTTP (IP) deploys without TLS */
+    /** Set COOKIE_SECURE=false for plain HTTP; true behind HTTPS */
     cookieSecure,
   };
 }
