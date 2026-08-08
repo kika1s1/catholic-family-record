@@ -46,8 +46,8 @@ em.g{font-style:italic;color:var(--gold)}
 .confbar{background:var(--red);color:#fff;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;text-align:center;padding:7px 16px;line-height:1.45}
 
 /* ---------- nav ---------- */
-.landing-root{overflow-x:clip;width:100%}
-.nav{position:sticky;top:0;z-index:60;background:rgba(246,244,239,.94);backdrop-filter:blur(10px);border-bottom:1px solid var(--rule)}
+.landing-root{width:100%;min-width:0}
+.nav{position:sticky;top:0;z-index:100;background:rgba(246,244,239,.98);backdrop-filter:blur(10px);border-bottom:1px solid var(--rule)}
 .nav-in{max-width:var(--maxw);margin:0 auto;padding:0 32px;min-height:58px;display:flex;align-items:center;justify-content:space-between;gap:16px;position:relative}
 .mark{font-family:var(--serif);font-size:19px;font-weight:600;letter-spacing:-.01em;white-space:nowrap;order:1}
 .mark b{color:var(--gold);font-weight:600}
@@ -87,8 +87,6 @@ em.g{font-style:italic;color:var(--gold)}
 .nav.is-open .nav-toggle span:nth-child(1){transform:translateY(8px) rotate(45deg)}
 .nav.is-open .nav-toggle span:nth-child(2){opacity:0}
 .nav.is-open .nav-toggle span:nth-child(3){transform:translateY(-8px) rotate(-45deg)}
-/* Keep scrollbar space so locking scroll does not widen the viewport and hide the toggle */
-html{scrollbar-gutter:stable}
 body.nav-lock{
   overflow:hidden;
   touch-action:none;
@@ -309,11 +307,21 @@ img,svg{max-width:100%;height:auto}
 }
 
 @media(max-width:1024px){
-  .nav-in{flex-wrap:nowrap;height:auto;padding:10px 24px;gap:10px}
-  .mark{font-size:17px;white-space:normal;line-height:1.2;max-width:min(100%,240px)}
-  .nav-toggle{display:flex}
-  .nav-cta-desktop{display:none}
-  .nav-actions{margin-left:auto}
+  /* Fixed bar so the hamburger never scrolls away on mobile */
+  .nav{
+    position:fixed;
+    top:0;left:0;right:0;
+    width:100%;
+    z-index:200;
+  }
+  .landing-root{
+    padding-top:58px;
+  }
+  .nav-in{flex-wrap:nowrap;height:auto;min-height:58px;padding:10px 16px;gap:10px}
+  .mark{font-size:17px;white-space:normal;line-height:1.2;max-width:min(100%,calc(100% - 56px))}
+  .nav-toggle{display:inline-flex !important}
+  .nav-cta-desktop{display:none !important}
+  .nav-actions{margin-left:auto;flex-shrink:0}
   .nav-links{
     display:none;
     order:4;
@@ -323,12 +331,13 @@ img,svg{max-width:100%;height:auto}
     align-items:stretch;
     gap:0;
     margin:0;
-    background:rgba(246,244,239,.98);
+    background:rgba(246,244,239,.99);
     border-bottom:1px solid var(--rule);
     padding:8px 20px 18px;
-    box-shadow:0 12px 28px rgba(18,35,58,.08);
+    box-shadow:0 12px 28px rgba(18,35,58,.12);
     max-height:min(70vh,520px);
     overflow-y:auto;
+    z-index:201;
   }
   .nav.is-open .nav-links{display:flex}
   .nav-links a{

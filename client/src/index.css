@@ -12,13 +12,21 @@ body,
 }
 
 html {
-  overflow-x: clip;
+  /* Avoid overflow on intermediate wrappers — that breaks position:sticky/fixed ancestors */
+  overflow-x: auto;
+  scrollbar-gutter: stable;
 }
 
 body {
   -webkit-font-smoothing: antialiased;
-  overflow-x: clip;
   width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+#root {
+  min-width: 0;
+  max-width: 100%;
 }
 
 img,
