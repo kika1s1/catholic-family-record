@@ -1,0 +1,61 @@
+name: Deploy VPS
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-vps
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    uses: ./.github/workflows/ci.yml
+
+  deploy:
+    needs: ci
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Rsync app to VPS
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+        run: |
+          rsync -az --delete \
+            --exclude '.git' \
+            --exclude 'node_modules' \
+            --exclude 'client/node_modules' \
+            --exclude 'server/node_modules' \
+            --exclude 'client/dist' \
+            --exclude 'server/dist' \
+            --exclude 'server/.env' \
+            --exclude 'server/data' \
+            --exclude 'deploy/logs' \
+            --exclude '.env' \
+            ./ "${VPS_USER}@${VPS_HOST}:/opt/catholic-family-record/"
+
+      - name: Remote build & reload
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+        run: |
+          ssh "${VPS_USER}@${VPS_HOST}" \
+            'chmod +x /opt/catholic-family-record/deploy/remote-deploy.sh && APP_DIR=/opt/catholic-family-record /opt/catholic-family-record/deploy/remote-deploy.sh'
+
+      - name: Smoke check public site
+        run: |
+          sleep 2
+          curl -fsS "http://${{ secrets.VPS_HOST }}/api/health"
+          echo
+          code=$(curl -s -o /dev/null -w "%{http_code}" "http://${{ secrets.VPS_HOST }}/")
+          test "$code" = "200"
