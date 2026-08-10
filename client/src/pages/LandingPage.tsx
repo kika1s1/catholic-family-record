@@ -150,7 +150,7 @@ export default function LandingPage() {
         <div className="nav-in">
           <div className="mark">The Catholic Family <b>Record</b></div>
           <div className="nav-actions">
-            <a className="nav-cta nav-cta-desktop" href="#talk">Request a session</a>
+            <a className="nav-cta nav-cta-desktop" href="#talk">Discuss a partnership</a>
             <button
               type="button"
               className="nav-toggle"
@@ -166,11 +166,12 @@ export default function LandingPage() {
           </div>
           <div id="landing-nav-menu" className="nav-links">
             <a href="#problem" onClick={closeNav}>The problem</a>
+            <a href="#today" onClick={closeNav}>What exists</a>
             <a href="#parish" onClick={closeNav}>Parish &amp; school</a>
             <a href="#diocese" onClick={closeNav}>Diocese</a>
             <a href="#replace" onClick={closeNav}>Replacing your stack</a>
             <a href="#founding" onClick={closeNav}>Founding program</a>
-            <a className="nav-cta nav-cta-mobile" href="#talk" onClick={closeNav}>Request a session</a>
+            <a className="nav-cta nav-cta-mobile" href="#talk" onClick={closeNav}>Discuss a partnership</a>
           </div>
         </div>
       </nav>
@@ -359,7 +360,7 @@ export default function LandingPage() {
 
           <div className="statnote">
             <div className="sn-fig">Nationally, volunteers donate to charity at roughly twice the rate of non&#8209;volunteers — about 80 percent, against 40 percent of non&#8209;volunteers.</div>
-            <p>Your volunteers and your givers are largely the same families. In most parishes they sit in two systems that have never been introduced, so the overlap a pastor most needs to see is the one thing he cannot. Stage two is where that stops.</p>
+            <p>Service and generosity tend to travel together. Yet in most parishes the ministry roster and the offertory record sit in systems that have never been introduced, so a parish cannot easily thank, form, or invite the people already giving it their Saturdays. Stage two is where that stops.</p>
             <p className="sn-src">Source · Volunteering and Civic Life in America, AmeriCorps with the U.S. Census Bureau.<br />Association, not causation — generous people tend to do both. The record makes the overlap visible; it does not manufacture generosity.</p>
           </div>
         </div>
@@ -501,6 +502,55 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ============ WHAT EXISTS ============ */}
+      <section className="sec sec-paper" id="today">
+        <div className="wrap">
+          <div className="sec-head ctr">
+            <div className="eyebrow">Said plainly, before anything else</div>
+            <h2>What exists today, and what we are building with you.</h2>
+            <p className="lede">A founding partnership is worth nothing if you cannot tell which parts are real. Here is the honest division. We would rather you hold us to it than discover it later.</p>
+          </div>
+
+          <div className="ladder">
+            <div className="rung">
+              <div className="rg-n">Available today</div>
+              <h3>In service now</h3>
+              <p>Running in Catholic schools and parishes across the country, and has been for years.</p>
+              <ul>
+                <li>School information and administration</li>
+                <li>Parish records and administration</li>
+                <li>Tuition, giving, and family payments</li>
+                <li>Communication and emergency alerts</li>
+              </ul>
+            </div>
+            <div className="rung">
+              <div className="rg-n">Ready for pilot</div>
+              <h3>The shared record</h3>
+              <p>Ready to prove in one parish and one school during the founding year.</p>
+              <ul>
+                <li>One household shared by parish and school</li>
+                <li>Sacramental history on the family record</li>
+                <li>Permission scoping between institutions</li>
+                <li>A single communication and alert list</li>
+              </ul>
+            </div>
+            <div className="rung">
+              <div className="rg-n">Built with the cohort</div>
+              <h3>Shaped by founding dioceses</h3>
+              <p>Specified with founding partners and delivered before go&#8209;live. Commitments, not things you can see today.</p>
+              <ul>
+                <li>Diocesan roll&#8209;up and mission reporting</li>
+                <li>Records that follow a family between parishes</li>
+                <li>Ministry, volunteer, and clearance management</li>
+                <li>Family self&#8209;service and record access</li>
+              </ul>
+            </div>
+          </div>
+
+          <p className="narrow" style={{marginTop: '26px', fontSize: '15.5px', color: 'var(--muted)', textAlign: 'center'}}>Everything in the third column is why a founding cohort exists. You are not buying it as it stands. You are deciding what it becomes.</p>
+        </div>
+      </section>
+
       {/* ============ THE SEAM ============ */}
       <section className="sec" id="replace">
         <div className="wrap">
@@ -565,22 +615,22 @@ export default function LandingPage() {
           <div className="sec-head" style={{maxWidth: '820px'}}>
             <div className="eyebrow-l">The founding difference</div>
             <h2>You are not buying a catalog. You are writing one.</h2>
-            <p className="lede-l">No national vendor will build something for one diocese. Their roadmap is set by a market, and your diocese is a rounding error in it. Ours is set by a founding cohort small enough that every member is in the room — and there is time to do it properly before you go live.</p>
+            <p className="lede-l">No national vendor will build something for one diocese. Their roadmap is set by a market, and your diocese is one voice among thousands in it. Ours is set by a founding cohort small enough that every member is in the room — and there is time to do it properly before you go live.</p>
           </div>
 
           <div className="build">
             <div className="bd">
-              <div className="bd-w">Now through spring</div>
+              <div className="bd-w">Autumn 2026 &ndash; spring 2027</div>
               <h4>The cohort specifies</h4>
               <p>Founding dioceses meet as a group and decide what the record must do for a diocese — jointly, so the roadmap serves all of you rather than fragmenting across each of you.</p>
             </div>
             <div className="bd">
-              <div className="bd-w">Through 2026 and 2027</div>
+              <div className="bd-w">Spring 2027 &ndash; summer 2027</div>
               <h4>We build to it</h4>
               <p>What the cohort prioritizes gets built, and each diocese is configured to its own governance — parish-governed schools and diocesan schools are not the same thing and are not treated as such.</p>
             </div>
             <div className="bd">
-              <div className="bd-w">2027&ndash;28 fiscal year</div>
+              <div className="bd-w">2027&ndash;28 school year</div>
               <h4>You go live on it</h4>
               <p>Not on a product built for someone else and adapted to you. On one shaped around how your diocese actually works, with a full year of specification behind it.</p>
             </div>
@@ -589,7 +639,7 @@ export default function LandingPage() {
           <div className="narrow" style={{marginTop: '44px', borderTop: '1px solid rgba(255,255,255,.16)', paddingTop: '32px'}}>
             <h3 style={{fontSize: '22px', marginBottom: '14px'}}>How a first year actually runs</h3>
             <p className="lede-l" style={{fontSize: '16px', marginBottom: '12px'}}><strong style={{color: '#fff'}}>One parish, one school.</strong> A single pair moves onto the record while everything else in the diocese keeps running exactly as it does today. Nobody bets a diocese on a summer.</p>
-            <p className="lede-l" style={{fontSize: '16px', marginBottom: '12px'}}><strong style={{color: '#fff'}}>Prove it in a term.</strong> Two offices, one record, one school year. If it does not visibly give those two offices their week back, it should not be extended, and we will say so first.</p>
+            <p className="lede-l" style={{fontSize: '16px', marginBottom: '12px'}}><strong style={{color: '#fff'}}>Prove it in one school year.</strong> Two offices, one record, a full academic year. If it does not visibly give those two offices their week back, it should not be extended, and we will say so first.</p>
             <p className="lede-l" style={{fontSize: '16px'}}><strong style={{color: '#fff'}}>Expand at your pace.</strong> Each additional parish and school comes on when its pastor and principal are ready and its current agreements allow, with a named specialist for every move.</p>
           </div>
         </div>
