@@ -31,15 +31,18 @@ echo "==> Start/reload CFR with PM2"
 pm2 startOrReload deploy/ecosystem.config.cjs --update-env
 pm2 save
 
-# Nginx site
+# Nginx site (do not clobber Certbot-managed SSL config)
 if [[ -f deploy/nginx.cfr.conf ]]; then
-  echo "==> Updating Nginx"
-  cp deploy/nginx.cfr.conf /etc/nginx/sites-available/cfr
-  ln -sfn /etc/nginx/sites-available/cfr /etc/nginx/sites-enabled/cfr
-  # Remove old optionc site if present
-  rm -f /etc/nginx/sites-enabled/optionc
-  nginx -t
-  systemctl reload nginx
+  if [[ -f /etc/letsencrypt/live/www.catholicfamilyrecord.com/fullchain.pem ]]; then
+    echo "==> SSL already enabled — leaving Nginx site unchanged"
+  else
+    echo "==> Updating Nginx"
+    cp deploy/nginx.cfr.conf /etc/nginx/sites-available/cfr
+    ln -sfn /etc/nginx/sites-available/cfr /etc/nginx/sites-enabled/cfr
+    rm -f /etc/nginx/sites-enabled/optionc
+    nginx -t
+    systemctl reload nginx
+  fi
 fi
 
 PORT="$(grep -E '^PORT=' server/.env | cut -d= -f2- || echo 4000)"
