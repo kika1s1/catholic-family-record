@@ -53,9 +53,21 @@ jobs:
             'chmod +x /opt/catholic-family-record/deploy/remote-deploy.sh && APP_DIR=/opt/catholic-family-record /opt/catholic-family-record/deploy/remote-deploy.sh'
 
       - name: Smoke check public site
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
         run: |
           sleep 2
-          curl -fsS "http://${{ secrets.VPS_HOST }}/api/health"
-          echo
-          code=$(curl -s -o /dev/null -w "%{http_code}" "http://${{ secrets.VPS_HOST }}/")
+          # Prefer domain HTTPS; fall back to Host header on the VPS IP
+          if curl -fsS --max-time 15 "https://www.catholicfamilyrecord.com/api/health"; then
+            echo
+            code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "https://www.catholicfamilyrecord.com/")
+          else
+            curl -fsS --max-time 15 \
+              --resolve "www.catholicfamilyrecord.com:443:${VPS_HOST}" \
+              "https://www.catholicfamilyrecord.com/api/health"
+            echo
+            code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 \
+              --resolve "www.catholicfamilyrecord.com:443:${VPS_HOST}" \
+              "https://www.catholicfamilyrecord.com/")
+          fi
           test "$code" = "200"
