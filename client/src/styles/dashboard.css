@@ -617,12 +617,14 @@
   position: relative;
   z-index: 1;
   width: 100%;
-  max-width: 520px;
-  margin: 0 auto;
+  max-width: none;
+  margin: 0;
   padding: clamp(28px, 5vw, 56px);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  align-items: flex-start;
+  text-align: left;
   gap: 40px;
 }
 
@@ -698,13 +700,18 @@
   color: var(--d-gold);
 }
 
+.login-brand-copy {
+  width: 100%;
+  text-align: left;
+}
+
 .login-brand-copy h1 {
   font-family: var(--d-serif);
   font-size: clamp(32px, 4.2vw, 48px);
   font-weight: 500;
   line-height: 1.12;
   letter-spacing: -0.02em;
-  max-width: 12ch;
+  max-width: 18ch;
   margin: 0 0 18px;
 }
 
@@ -712,7 +719,7 @@
   font-size: clamp(15px, 1.5vw, 17px);
   line-height: 1.65;
   color: #a9bbd0;
-  max-width: 38ch;
+  max-width: 42ch;
   margin: 0;
 }
 
@@ -728,8 +735,8 @@
 
 .login-panel-form {
   display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: stretch;
+  justify-content: flex-start;
   background:
     radial-gradient(700px 320px at 100% 0%, rgba(217, 180, 74, 0.08), transparent 50%),
     linear-gradient(180deg, #fbfaf7 0%, var(--d-paper) 100%);
@@ -738,6 +745,8 @@
 
 .login-form-shell {
   width: min(420px, 100%);
+  margin: auto 0;
+  text-align: left;
 }
 
 .login-form-intro {

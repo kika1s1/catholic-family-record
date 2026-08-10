@@ -64,11 +64,11 @@ export default function LoginPage() {
         <div className="login-brand-inner">
           <BrandLogo />
           <div className="login-brand-copy">
-            <p className="login-eyebrow">Partner console</p>
-            <h1>One family. One record. One faith.</h1>
+            <p className="login-eyebrow">Admin console</p>
+            <h1>Review leads and landing activity.</h1>
             <p className="login-brand-lede">
               Sign in to review Discovery Session requests and activity from the
-              landing page — roles, organizations, and pipeline status in one place.
+              landing page — roles, organizations, and pipeline status.
             </p>
           </div>
           <p className="login-brand-foot">Serving Catholic schools and parishes for over 20 years</p>
@@ -78,10 +78,10 @@ export default function LoginPage() {
       <section className="login-panel login-panel-form">
         <div className="login-form-shell">
           <div className="login-form-intro">
-            <p className="login-eyebrow dark">Partner access</p>
+            <p className="login-eyebrow dark">Admin access</p>
             <h2>Sign in</h2>
             <p className="login-form-lede">
-              Use your console credentials to open the operations dashboard.
+              Use your admin credentials to open the operations dashboard.
             </p>
           </div>
 
@@ -92,7 +92,7 @@ export default function LoginPage() {
                 id="email"
                 type="email"
                 autoComplete="username"
-                placeholder="e.g. you@yourdiocese.org"
+                placeholder="e.g. admin@optionc.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -105,7 +105,7 @@ export default function LoginPage() {
                   id="password"
                   type={showPassword ? "text" : "password"}
                   autoComplete="current-password"
-                  placeholder="Enter your partner console password"
+                  placeholder="Enter your password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required

@@ -85,7 +85,7 @@ export default function ProfilePage() {
       <div className="profile-grid">
         <section className="profile-card">
           <h3>Display name</h3>
-          <p className="panel-sub">Shown in the partner console sidebar and session.</p>
+          <p className="panel-sub">Shown in the admin console sidebar and session.</p>
 
           <form onSubmit={onSaveName}>
             <div className="login-field">

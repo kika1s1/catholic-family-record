@@ -101,7 +101,7 @@ export function DashboardShell() {
           <div className="mark">
             The Catholic Family <b>Record</b>
           </div>
-          <div className="sub">Partner console</div>
+          <div className="sub">Admin console</div>
         </div>
 
         <nav className="dash-nav">
