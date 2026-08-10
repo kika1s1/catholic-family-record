@@ -1,6 +1,7 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import express from "express";
+import compression from "compression";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import helmet from "helmet";
@@ -19,6 +20,7 @@ export function createApp() {
   const app = express();
 
   app.set("trust proxy", 1);
+  app.use(compression());
   app.use(helmet({ contentSecurityPolicy: false }));
   app.use(
     cors({
@@ -47,12 +49,24 @@ export function createApp() {
 
   if (env.isProd) {
     const clientDist = path.resolve(__dirname, "../../client/dist");
-    app.use(express.static(clientDist));
+    app.use(
+      express.static(clientDist, {
+        // Hashed Vite assets can be cached forever; HTML stays short-lived.
+        maxAge: "1y",
+        immutable: true,
+        setHeaders(res, filePath) {
+          if (filePath.endsWith("index.html")) {
+            res.setHeader("Cache-Control", "no-cache");
+          }
+        },
+      }),
+    );
     app.get(/^(?!\/api).*/, (req, res, next) => {
       if (req.method !== "GET") {
         next();
         return;
       }
+      res.setHeader("Cache-Control", "no-cache");
       res.sendFile(path.join(clientDist, "index.html"), (err) => {
         if (err) next();
       });

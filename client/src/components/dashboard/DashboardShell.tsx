@@ -11,6 +11,7 @@ import {
   X,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
+import "../../styles/dashboard.css";
 
 export function DashboardShell() {
   const { user, logout } = useAuth();
