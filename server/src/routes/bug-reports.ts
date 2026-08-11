@@ -9,6 +9,7 @@ const bodySchema = z.object({
   user_email: z.string().email().optional().or(z.literal("")),
   env: z.enum(["production", "staging"]).optional(),
   source: z.enum(["manual", "auto"]).optional(),
+  kind: z.enum(["bug", "feature", "training", "feedback"]).optional(),
   stack: z.string().max(50_000).optional().or(z.literal("")),
   fingerprint: z.string().max(64).optional().or(z.literal("")),
   where: z

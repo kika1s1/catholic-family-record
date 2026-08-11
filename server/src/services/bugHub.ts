@@ -1,3 +1,5 @@
+export type BugHubKind = "bug" | "feature" | "training" | "feedback";
+
 export type BugHubPayload = {
   title: string;
   description: string;
@@ -5,6 +7,7 @@ export type BugHubPayload = {
   user_email?: string;
   env?: "production" | "staging";
   source?: "manual" | "auto";
+  kind?: BugHubKind;
   stack?: string;
   fingerprint?: string;
   where?: {
@@ -39,6 +42,7 @@ export async function forwardToBugHub(
         payload.env ??
         (process.env.NODE_ENV === "production" ? "production" : "staging"),
       source: payload.source ?? "manual",
+      kind: payload.kind ?? "bug",
     }),
   });
 
