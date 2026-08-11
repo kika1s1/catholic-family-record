@@ -10,7 +10,9 @@ import { env } from "./utils/env.js";
 import { authRouter } from "./routes/auth.js";
 import { leadsRouter } from "./routes/leads.js";
 import { analyticsRouter } from "./routes/analytics.js";
+import { bugReportsRouter } from "./routes/bug-reports.js";
 import { ensureAdminUser } from "./services/authService.js";
+import { reportServerError } from "./services/bugHub.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -46,6 +48,7 @@ export function createApp() {
   app.use("/api/auth", authRouter);
   app.use("/api/leads", leadsRouter);
   app.use("/api/analytics", analyticsRouter);
+  app.use("/api/bug-reports", bugReportsRouter);
 
   if (env.isProd) {
     const clientDist = path.resolve(__dirname, "../../client/dist");
@@ -76,11 +79,12 @@ export function createApp() {
   app.use(
     (
       err: unknown,
-      _req: express.Request,
+      req: express.Request,
       res: express.Response,
       _next: express.NextFunction,
     ) => {
       console.error(err);
+      reportServerError(err, req);
       res.status(500).json({ error: "Internal server error" });
     },
   );
