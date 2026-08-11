@@ -1,3 +1,5 @@
+export type ReportKind = "bug" | "feature" | "training" | "feedback";
+
 export type BugReportPayload = {
   title: string;
   description: string;
@@ -5,6 +7,7 @@ export type BugReportPayload = {
   page_url?: string;
   env?: "production" | "staging";
   source?: "manual" | "auto";
+  kind?: ReportKind;
   stack?: string;
   fingerprint?: string;
   where?: {
@@ -18,6 +21,7 @@ export type BugReportPayload = {
 export type BugReportResult = {
   id: string;
   deduped?: boolean;
+  notified?: boolean;
 };
 
 function simpleFingerprint(message: string, stack?: string): string {
@@ -64,6 +68,7 @@ export async function submitBugReport(payload: BugReportPayload): Promise<BugRep
       ...payload,
       page_url: payload.page_url ?? window.location.href,
       source: payload.source ?? "manual",
+      kind: payload.kind ?? "bug",
     }),
     keepalive: true,
   });
