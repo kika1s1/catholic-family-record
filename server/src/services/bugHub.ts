@@ -5,6 +5,8 @@ export type BugHubPayload = {
   description: string;
   page_url?: string;
   user_email?: string;
+  user_phone?: string;
+  screenshot_base64?: string;
   env?: "production" | "staging";
   source?: "manual" | "auto";
   kind?: BugHubKind;

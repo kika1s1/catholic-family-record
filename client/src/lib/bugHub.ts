@@ -4,6 +4,8 @@ export type BugReportPayload = {
   title: string;
   description: string;
   user_email?: string;
+  user_phone?: string;
+  screenshot_base64?: string;
   page_url?: string;
   env?: "production" | "staging";
   source?: "manual" | "auto";
@@ -73,7 +75,9 @@ export async function submitBugReport(payload: BugReportPayload): Promise<BugRep
     keepalive: true,
   });
   if (!res.ok) {
-    throw new Error(await res.text());
+    const text = await res.text();
+    console.error("[bug-hub] submit failed", res.status, text);
+    throw new Error("Could not send. Please try again.");
   }
   return res.json() as Promise<BugReportResult>;
 }

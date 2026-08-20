@@ -7,6 +7,11 @@ const bodySchema = z.object({
   description: z.string().min(3).max(20_000),
   page_url: z.string().url().optional().or(z.literal("")),
   user_email: z.string().email().optional().or(z.literal("")),
+  user_phone: z
+    .string()
+    .regex(/^[\d\s()+.-]{7,30}$/, "Enter a phone number we can call")
+    .optional()
+    .or(z.literal("")),
   env: z.enum(["production", "staging"]).optional(),
   source: z.enum(["manual", "auto"]).optional(),
   kind: z.enum(["bug", "feature", "training", "feedback"]).optional(),
@@ -20,7 +25,19 @@ const bodySchema = z.object({
       function: z.string().optional(),
     })
     .optional(),
-});
+    screenshot_base64: z.string().max(3_500_000).optional().or(z.literal("")),
+})
+  // Anything a person typed must carry a reply address, because the team
+  // answers submissions by email. Auto-captured errors have no author.
+  .superRefine((data, ctx) => {
+    if (data.source !== "auto" && !(data.user_email ?? "").trim()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["user_email"],
+        message: "Email is required so we can reply",
+      });
+    }
+  });
 
 export const bugReportsRouter = Router();
 
