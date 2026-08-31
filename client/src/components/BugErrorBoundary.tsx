@@ -30,10 +30,14 @@ export class BugErrorBoundary extends Component<Props, State> {
   render() {
     if (this.state.hasError) {
       return (
-        <div style={{ padding: "2rem", fontFamily: "system-ui" }}>
-          <h1>Something went wrong</h1>
-          <p>The error was reported automatically. Please refresh the page.</p>
-          <button type="button" onClick={() => this.setState({ hasError: false })}>
+        <div className="p-8 font-sans text-slate-800">
+          <h1 className="font-serif text-2xl font-semibold">Something went wrong</h1>
+          <p className="mt-2 text-slate-600">The error was reported automatically. Please refresh the page.</p>
+          <button
+            type="button"
+            className="mt-4 rounded-md bg-slate-900 px-4 py-2 font-semibold text-white"
+            onClick={() => this.setState({ hasError: false })}
+          >
             Try again
           </button>
         </div>

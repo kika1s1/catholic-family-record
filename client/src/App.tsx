@@ -16,7 +16,7 @@ const ProfilePage = lazy(() => import("./pages/ProfilePage"));
 
 function DashboardFallback() {
   return (
-    <div style={{ padding: "2rem", fontFamily: "system-ui, sans-serif" }}>
+    <div className="p-8 font-sans text-slate-600">
       Loading…
     </div>
   );

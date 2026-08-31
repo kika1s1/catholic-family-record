@@ -211,48 +211,115 @@ function screenshotError(file: File): string | null {
   return null;
 }
 
-async function captureVisibleTab(): Promise<File> {
-  const media = navigator.mediaDevices;
-  if (!media?.getDisplayMedia) {
-    throw new Error("This browser cannot capture the page. Please attach a screenshot instead.");
-  }
-  const stream = await media.getDisplayMedia({
-    video: true,
-    audio: false,
-    // Chrome: offer the current tab first.
-    preferCurrentTab: true,
-  } as DisplayMediaStreamOptions);
-  const track = stream.getVideoTracks()[0];
-  if (!track) {
-    stream.getTracks().forEach((t) => t.stop());
-    throw new Error("No image came back from the capture.");
-  }
-  const video = document.createElement("video");
-  video.srcObject = stream;
-  video.muted = true;
-  await video.play();
-  await new Promise((resolve) => window.setTimeout(resolve, 120));
-  const canvas = document.createElement("canvas");
-  canvas.width = video.videoWidth || 1280;
-  canvas.height = video.videoHeight || 720;
-  const ctx = canvas.getContext("2d");
-  if (!ctx) {
-    track.stop();
-    throw new Error("Could not capture this page.");
-  }
-  ctx.drawImage(video, 0, 0);
-  stream.getTracks().forEach((t) => t.stop());
+type Region = { x: number; y: number; width: number; height: number };
+
+function normalizeRegion(a: { x: number; y: number }, b: { x: number; y: number }): Region {
+  const x = Math.min(a.x, b.x);
+  const y = Math.min(a.y, b.y);
+  return { x, y, width: Math.abs(b.x - a.x), height: Math.abs(b.y - a.y) };
+}
+
+async function canvasToPngFile(canvas: HTMLCanvasElement, name: string): Promise<File> {
   const blob = await new Promise<Blob>((resolve, reject) => {
     canvas.toBlob((next) => (next ? resolve(next) : reject(new Error("Could not capture this page."))), "image/png");
   });
   if (blob.size > MAX_SCREENSHOT_BYTES) {
     throw new Error("The capture was over 2 MB. Please attach a smaller screenshot.");
   }
-  return new File([blob], "page.png", { type: "image/png" });
+  return new File([blob], name, { type: "image/png" });
+}
+
+function cropCanvasToRegion(source: HTMLCanvasElement, region: Region): HTMLCanvasElement {
+  const scaleX = source.width / Math.max(1, window.innerWidth);
+  const scaleY = source.height / Math.max(1, window.innerHeight);
+  const sx = Math.max(0, Math.min(Math.round(region.x * scaleX), source.width - 1));
+  const sy = Math.max(0, Math.min(Math.round(region.y * scaleY), source.height - 1));
+  const sw = Math.max(1, Math.min(Math.round(region.width * scaleX), source.width - sx));
+  const sh = Math.max(1, Math.min(Math.round(region.height * scaleY), source.height - sy));
+  const out = document.createElement("canvas");
+  out.width = sw;
+  out.height = sh;
+  const ctx = out.getContext("2d");
+  if (!ctx) throw new Error("Could not crop the selected area.");
+  ctx.drawImage(source, sx, sy, sw, sh, 0, 0, sw, sh);
+  return out;
+}
+
+function collectPageCss(): string {
+  let css = "";
+  for (const sheet of Array.from(document.styleSheets)) {
+    try {
+      for (const rule of Array.from(sheet.cssRules)) css += `${rule.cssText}\n`;
+    } catch {
+      // Cross-origin stylesheets are not readable.
+    }
+  }
+  return css;
+}
+
+function hideWidgetChrome(): Array<{ el: HTMLElement; visibility: string }> {
+  const hidden: Array<{ el: HTMLElement; visibility: string }> = [];
+  document.querySelectorAll(".bh-rw").forEach((node) => {
+    if (!(node instanceof HTMLElement)) return;
+    hidden.push({ el: node, visibility: node.style.visibility });
+    node.style.visibility = "hidden";
+  });
+  return hidden;
+}
+
+async function snapshotViewport(): Promise<HTMLCanvasElement> {
+  const width = window.innerWidth;
+  const height = window.innerHeight;
+  const scale = Math.min(2, window.devicePixelRatio || 1);
+  const clone = document.documentElement.cloneNode(true) as HTMLElement;
+  clone.setAttribute("xmlns", "http://www.w3.org/1999/xhtml");
+  clone.querySelectorAll("script, iframe, .bh-rw").forEach((node) => node.remove());
+  clone.querySelectorAll('link[rel="stylesheet"]').forEach((node) => node.remove());
+  const style = document.createElement("style");
+  style.textContent = collectPageCss();
+  (clone.querySelector("head") ?? clone).appendChild(style);
+  clone.style.margin = "0";
+  clone.style.transform = `translate(${-window.scrollX}px, ${-window.scrollY}px)`;
+
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}"><foreignObject width="${width}" height="${height}">${new XMLSerializer().serializeToString(clone)}</foreignObject></svg>`;
+  const url = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml;charset=utf-8" }));
+  try {
+    const image = new Image();
+    image.decoding = "sync";
+    await new Promise<void>((resolve, reject) => {
+      image.onload = () => resolve();
+      image.onerror = () => reject(new Error("Could not capture this page. Please attach a screenshot instead."));
+      image.src = url;
+    });
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.max(1, Math.round(width * scale));
+    canvas.height = Math.max(1, Math.round(height * scale));
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("Could not capture this page.");
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+    return canvas;
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
+async function capturePageRegion(region: Region): Promise<File> {
+  const hidden = hideWidgetChrome();
+  try {
+    await new Promise<void>((resolve) => {
+      requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+    });
+    const frame = await snapshotViewport();
+    return canvasToPngFile(cropCanvasToRegion(frame, region), "selection.png");
+  } finally {
+    for (const { el, visibility } of hidden) el.style.visibility = visibility;
+  }
 }
 
 function canCapturePage(): boolean {
-  return typeof navigator !== "undefined" && Boolean(navigator.mediaDevices?.getDisplayMedia);
+  return typeof document !== "undefined";
 }
 
 export type ReportWidgetProps = {
@@ -284,6 +351,8 @@ export function ReportWidget({
   const [referenceId, setReferenceId] = useState("");
   const [overlayBusy, setOverlayBusy] = useState(false);
   const [capturing, setCapturing] = useState(false);
+  const [pickingRegion, setPickingRegion] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const rootRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -296,13 +365,26 @@ export function ReportWidget({
 
   const open = step !== "closed";
   const sending = step === "sending";
-  const launcherVisible = step === "closed" && !overlayBusy;
+  const hideChrome = pickingRegion || capturing;
+  const launcherVisible = step === "closed" && !overlayBusy && !hideChrome;
 
   useEffect(() => {
     if (defaultEmail) {
       setEmail((prev) => prev || defaultEmail);
     }
   }, [defaultEmail]);
+
+  useEffect(() => {
+    if (!screenshot || typeof URL.createObjectURL !== "function") {
+      setPreviewUrl(null);
+      return;
+    }
+    const url = URL.createObjectURL(screenshot);
+    setPreviewUrl(url);
+    return () => {
+      if (typeof URL.revokeObjectURL === "function") URL.revokeObjectURL(url);
+    };
+  }, [screenshot]);
 
   useEffect(() => {
     const onOpen = (event: Event) => {
@@ -339,6 +421,11 @@ export function ReportWidget({
       if (event.key === "Escape") {
         if (sending) return;
         event.preventDefault();
+        if (pickingRegion || capturing) {
+          setPickingRegion(false);
+          setCapturing(false);
+          return;
+        }
         close();
         return;
       }
@@ -364,7 +451,7 @@ export function ReportWidget({
     return () => document.removeEventListener("keydown", onKey);
     // close is stable enough for this listener; sending must be current.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, sending]);
+  }, [open, sending, pickingRegion, capturing]);
 
   useEffect(() => {
     if (step !== "closed" || !restoreFocusRef.current) return;
@@ -397,6 +484,7 @@ export function ReportWidget({
   function close() {
     setStep("closed");
     setCapturing(false);
+    setPickingRegion(false);
     reset();
   }
 
@@ -487,12 +575,31 @@ export function ReportWidget({
     setFieldErrors((prev) => ({ ...prev, screenshot: undefined }));
   }
 
-  async function onCapture() {
-    setCapturing(true);
+  function onCapture() {
     setFieldErrors((prev) => ({ ...prev, screenshot: undefined }));
+    setPickingRegion(true);
+  }
+
+  function cancelPick() {
+    setPickingRegion(false);
+    setCapturing(false);
+  }
+
+  async function onRegionSelected(region: Region) {
+    setPickingRegion(false);
+    if (region.width < 8 || region.height < 8) {
+      setFieldErrors((prev) => ({
+        ...prev,
+        screenshot: "Drag a larger area, or attach a file.",
+      }));
+      return;
+    }
+    setCapturing(true);
     try {
-      const file = await captureVisibleTab();
-      onPickFile(file);
+      await new Promise<void>((resolve) => {
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+      });
+      onPickFile(await capturePageRegion(region));
     } catch (err) {
       const message = err instanceof Error ? err.message : "Could not capture this page.";
       if (message.toLowerCase().includes("abort") || message.toLowerCase().includes("denied")) {
@@ -525,7 +632,17 @@ export function ReportWidget({
         </button>
       ) : null}
 
-      {open ? (
+      {pickingRegion ? (
+        <RegionPicker onSelect={(region) => void onRegionSelected(region)} onCancel={cancelPick} />
+      ) : null}
+
+      {capturing && !pickingRegion ? (
+        <div className="bh-rw-pick-hint" role="status">
+          Capturing the selected area…
+        </div>
+      ) : null}
+
+      {open && !hideChrome ? (
         <div
           className="bh-rw-scrim"
           onClick={() => {
@@ -534,7 +651,7 @@ export function ReportWidget({
         />
       ) : null}
 
-      {open ? (
+      {open && !hideChrome ? (
         <div
           ref={panelRef}
           className="bh-rw-panel"
@@ -694,13 +811,30 @@ export function ReportWidget({
                       type="button"
                       className="bh-rw-attach"
                       disabled={disabled || capturing}
-                      onClick={() => void onCapture()}
+                      onClick={onCapture}
                     >
-                      {capturing ? "Capturing…" : "Capture this page"}
+                      Select area
                     </button>
                   ) : null}
                 </div>
-                {screenshot ? <p className="bh-rw-file">{screenshot.name}</p> : null}
+                {screenshot && previewUrl ? (
+                  <div className="bh-rw-preview">
+                    <img src={previewUrl} alt="Selected screenshot" />
+                    <div>
+                      <p className="bh-rw-file">{screenshot.name}</p>
+                      <button
+                        type="button"
+                        className="bh-rw-clear"
+                        disabled={disabled}
+                        onClick={() => onPickFile(undefined)}
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                ) : screenshot ? (
+                  <p className="bh-rw-file">{screenshot.name}</p>
+                ) : null}
                 {fieldErrors.screenshot ? <p className="bh-rw-error">{fieldErrors.screenshot}</p> : null}
               </div>
 
@@ -742,6 +876,69 @@ export function ReportWidget({
           ) : null}
         </div>
       ) : null}
+    </div>
+  );
+}
+
+function RegionPicker({
+  onSelect,
+  onCancel,
+}: {
+  onSelect: (region: Region) => void;
+  onCancel: () => void;
+}) {
+  const [origin, setOrigin] = useState<{ x: number; y: number } | null>(null);
+  const [current, setCurrent] = useState<{ x: number; y: number } | null>(null);
+  const region = origin && current ? normalizeRegion(origin, current) : null;
+
+  function pointFromEvent(event: { clientX: number; clientY: number }) {
+    return { x: event.clientX, y: event.clientY };
+  }
+
+  return (
+    <div
+      className="bh-rw-pick"
+      role="dialog"
+      aria-label="Select a screenshot area"
+      aria-modal="true"
+      onPointerDown={(event) => {
+        if (event.button !== 0) return;
+        event.currentTarget.setPointerCapture(event.pointerId);
+        const point = pointFromEvent(event);
+        setOrigin(point);
+        setCurrent(point);
+      }}
+      onPointerMove={(event) => {
+        if (!origin) return;
+        setCurrent(pointFromEvent(event));
+      }}
+      onPointerUp={(event) => {
+        if (!origin) return;
+        const next = normalizeRegion(origin, pointFromEvent(event));
+        setOrigin(null);
+        setCurrent(null);
+        onSelect(next);
+      }}
+    >
+      <div className="bh-rw-pick-hint">
+        Drag to select an area · Esc to cancel
+        <button type="button" className="bh-rw-pick-cancel" onClick={onCancel} onPointerDown={(e) => e.stopPropagation()}>
+          Cancel
+        </button>
+      </div>
+      {region && region.width + region.height > 2 ? (
+        <div
+          className="bh-rw-pick-hole"
+          style={{
+            left: region.x,
+            top: region.y,
+            width: region.width,
+            height: region.height,
+          }}
+        />
+      ) : (
+        <div className="bh-rw-pick-dim" />
+      )}
     </div>
   );
 }
@@ -871,6 +1068,37 @@ const WIDGET_CSS = `
 .bh-rw-attach input { display: none; }
 .bh-rw-attach:hover { border-color: #cbd5e1; background: #f1f5f9; }
 .bh-rw-file { margin: 0; font-size: 12px; color: #334155; }
+.bh-rw-preview { display: flex; align-items: flex-start; gap: 10px; margin-top: 6px; }
+.bh-rw-preview img {
+  width: 88px; height: 64px; object-fit: cover; border-radius: 8px;
+  border: 1px solid #e2e8f0; background: #f8fafc;
+}
+.bh-rw-clear {
+  border: 0; background: transparent; color: #64748b; font: inherit; font-size: 12px;
+  padding: 0; cursor: pointer;
+}
+.bh-rw-clear:hover { color: #0f172a; }
+.bh-rw-pick {
+  position: fixed; inset: 0; z-index: 2147483010;
+  cursor: crosshair; touch-action: none; user-select: none; overflow: hidden;
+}
+.bh-rw-pick-dim { position: absolute; inset: 0; background: rgba(15, 23, 42, 0.38); }
+.bh-rw-pick-hole {
+  position: absolute; border: 2px solid #fff; border-radius: 2px;
+  box-shadow: 0 0 0 9999px rgba(15, 23, 42, 0.5);
+  pointer-events: none;
+}
+.bh-rw-pick-hint {
+  position: fixed; top: 16px; left: 50%; transform: translateX(-50%); z-index: 2147483011;
+  display: inline-flex; align-items: center; gap: 10px;
+  background: #0f172a; color: #fff; padding: 8px 12px 8px 14px; border-radius: 999px;
+  font-size: 13px; font-weight: 600; pointer-events: none; white-space: nowrap;
+}
+.bh-rw-pick-cancel {
+  pointer-events: auto; border: 0; border-radius: 999px; cursor: pointer;
+  background: #fff; color: #0f172a; font: inherit; font-size: 12px; font-weight: 650;
+  min-height: 28px; padding: 0 10px;
+}
 .bh-rw-actions { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 12px; }
 .bh-rw-back {
   border: 0; background: transparent; color: #64748b; font: inherit; font-size: 14px;
@@ -893,6 +1121,8 @@ const WIDGET_CSS = `
 .bh-rw-back:focus-visible,
 .bh-rw-submit:focus-visible,
 .bh-rw-attach:focus-visible,
+.bh-rw-clear:focus-visible,
+.bh-rw-pick-cancel:focus-visible,
 .bh-rw-field:focus-visible {
   outline: 2px solid var(--bh-accent, #0f766e);
   outline-offset: 2px;

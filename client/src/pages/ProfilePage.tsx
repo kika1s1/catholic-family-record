@@ -2,6 +2,54 @@ import { useEffect, useState, type FormEvent } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { api } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
+import { btn, card, eyebrow, fieldInput, fieldLabel, pageHead } from "../components/ui/classes";
+
+function PasswordField({
+  id,
+  label,
+  value,
+  onChange,
+  show,
+  onToggle,
+  autoComplete,
+  placeholder,
+}: {
+  id: string;
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  show: boolean;
+  onToggle: () => void;
+  autoComplete: string;
+  placeholder: string;
+}) {
+  return (
+    <div className="mb-4">
+      <label className={fieldLabel} htmlFor={id}>{label}</label>
+      <div className="relative">
+        <input
+          id={id}
+          type={show ? "text" : "password"}
+          autoComplete={autoComplete}
+          placeholder={placeholder}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          required
+          minLength={id === "current-password" ? undefined : 12}
+          className={`${fieldInput} pr-12`}
+        />
+        <button
+          type="button"
+          className="absolute inset-y-0 right-0 px-3 text-slate-500 hover:text-slate-800"
+          onClick={onToggle}
+          aria-label={show ? `Hide ${label.toLowerCase()}` : `Show ${label.toLowerCase()}`}
+        >
+          {show ? <EyeOff size={18} /> : <Eye size={18} />}
+        </button>
+      </div>
+    </div>
+  );
+}
 
 export default function ProfilePage() {
   const { user, setUser } = useAuth();
@@ -74,32 +122,33 @@ export default function ProfilePage() {
 
   return (
     <>
-      <header className="dash-top">
+      <header className={pageHead}>
         <div>
-          <div className="dash-eyebrow">Account</div>
-          <h1>Profile settings</h1>
-          <p>Update your display name and console password.</p>
+          <p className={eyebrow}>Account</p>
+          <h1 className="mt-1 font-serif text-3xl font-semibold text-slate-900">Profile settings</h1>
+          <p className="mt-1 text-slate-600">Update your display name and console password.</p>
         </div>
       </header>
 
-      <div className="profile-grid">
-        <section className="profile-card">
-          <h3>Display name</h3>
-          <p className="panel-sub">Shown in the admin console sidebar and session.</p>
+      <div className="grid gap-6 lg:grid-cols-2">
+        <section className={card}>
+          <h3 className="font-serif text-xl font-semibold text-slate-900">Display name</h3>
+          <p className="mt-1 text-sm text-slate-500">Shown in the admin console sidebar and session.</p>
 
-          <form onSubmit={onSaveName}>
-            <div className="login-field">
-              <label htmlFor="profile-email">Email</label>
+          <form className="mt-6" onSubmit={onSaveName}>
+            <div className="mb-4">
+              <label className={fieldLabel} htmlFor="profile-email">Email</label>
               <input
                 id="profile-email"
                 type="email"
                 value={user?.email ?? ""}
                 disabled
                 readOnly
+                className={fieldInput}
               />
             </div>
-            <div className="login-field">
-              <label htmlFor="profile-name">Name</label>
+            <div className="mb-6">
+              <label className={fieldLabel} htmlFor="profile-name">Name</label>
               <input
                 id="profile-name"
                 type="text"
@@ -109,98 +158,62 @@ export default function ProfilePage() {
                 onChange={(e) => setName(e.target.value)}
                 required
                 maxLength={120}
+                className={fieldInput}
               />
             </div>
-            <button className="login-btn" type="submit" disabled={nameSaving}>
+            <button className={btn} type="submit" disabled={nameSaving}>
               {nameSaving ? "Saving…" : "Save name"}
             </button>
             {nameMsg ? (
-              <p className={nameMsg.ok ? "profile-ok" : "login-error"}>{nameMsg.text}</p>
+              <p className={`mt-3 text-sm ${nameMsg.ok ? "text-emerald-700" : "text-red-700"}`}>
+                {nameMsg.text}
+              </p>
             ) : null}
           </form>
         </section>
 
-        <section className="profile-card">
-          <h3>Change password</h3>
-          <p className="panel-sub">Use at least 12 characters. You will stay signed in.</p>
+        <section className={card}>
+          <h3 className="font-serif text-xl font-semibold text-slate-900">Change password</h3>
+          <p className="mt-1 text-sm text-slate-500">Use at least 12 characters. You will stay signed in.</p>
 
-          <form onSubmit={onChangePassword}>
-            <div className="login-field">
-              <label htmlFor="current-password">Current password</label>
-              <div className="login-password-wrap">
-                <input
-                  id="current-password"
-                  type={showCurrent ? "text" : "password"}
-                  autoComplete="current-password"
-                  placeholder="Enter your current password"
-                  value={currentPassword}
-                  onChange={(e) => setCurrentPassword(e.target.value)}
-                  required
-                />
-                <button
-                  type="button"
-                  className="login-password-toggle"
-                  onClick={() => setShowCurrent((v) => !v)}
-                  aria-label={showCurrent ? "Hide current password" : "Show current password"}
-                >
-                  {showCurrent ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
-            </div>
-
-            <div className="login-field">
-              <label htmlFor="new-password">New password</label>
-              <div className="login-password-wrap">
-                <input
-                  id="new-password"
-                  type={showNew ? "text" : "password"}
-                  autoComplete="new-password"
-                  placeholder="e.g. at least 12 characters"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  required
-                  minLength={12}
-                />
-                <button
-                  type="button"
-                  className="login-password-toggle"
-                  onClick={() => setShowNew((v) => !v)}
-                  aria-label={showNew ? "Hide new password" : "Show new password"}
-                >
-                  {showNew ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
-            </div>
-
-            <div className="login-field">
-              <label htmlFor="confirm-password">Confirm new password</label>
-              <div className="login-password-wrap">
-                <input
-                  id="confirm-password"
-                  type={showConfirm ? "text" : "password"}
-                  autoComplete="new-password"
-                  placeholder="Re-enter the new password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  required
-                  minLength={12}
-                />
-                <button
-                  type="button"
-                  className="login-password-toggle"
-                  onClick={() => setShowConfirm((v) => !v)}
-                  aria-label={showConfirm ? "Hide confirmation" : "Show confirmation"}
-                >
-                  {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
-            </div>
-
-            <button className="login-btn" type="submit" disabled={passSaving}>
+          <form className="mt-6" onSubmit={onChangePassword}>
+            <PasswordField
+              id="current-password"
+              label="Current password"
+              value={currentPassword}
+              onChange={setCurrentPassword}
+              show={showCurrent}
+              onToggle={() => setShowCurrent((v) => !v)}
+              autoComplete="current-password"
+              placeholder="Enter your current password"
+            />
+            <PasswordField
+              id="new-password"
+              label="New password"
+              value={newPassword}
+              onChange={setNewPassword}
+              show={showNew}
+              onToggle={() => setShowNew((v) => !v)}
+              autoComplete="new-password"
+              placeholder="e.g. at least 12 characters"
+            />
+            <PasswordField
+              id="confirm-password"
+              label="Confirm new password"
+              value={confirmPassword}
+              onChange={setConfirmPassword}
+              show={showConfirm}
+              onToggle={() => setShowConfirm((v) => !v)}
+              autoComplete="new-password"
+              placeholder="Re-enter the new password"
+            />
+            <button className={btn} type="submit" disabled={passSaving}>
               {passSaving ? "Updating…" : "Update password"}
             </button>
             {passMsg ? (
-              <p className={passMsg.ok ? "profile-ok" : "login-error"}>{passMsg.text}</p>
+              <p className={`mt-3 text-sm ${passMsg.ok ? "text-emerald-700" : "text-red-700"}`}>
+                {passMsg.text}
+              </p>
             ) : null}
           </form>
         </section>
