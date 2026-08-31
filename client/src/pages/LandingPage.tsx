@@ -892,8 +892,8 @@ export default function LandingPage() {
           <div className="grid gap-5 md:grid-cols-3">
             {[
               ['Autumn 2026 – spring 2027', 'The cohort specifies', 'Founding dioceses meet as a group and decide what the record must do for a diocese — jointly, so the roadmap serves all of you rather than fragmenting across each of you.'],
-              ['Spring 2027 – summer 2027', 'We build to it', 'What the cohort prioritizes gets built, and each diocese is configured to its own governance — parish-governed schools and diocesan schools are not the same thing and are not treated as such.'],
-              ['2027–28 school year', 'You go live on it', 'Not on a product built for someone else and adapted to you. On one shaped around how your diocese actually works, with a full year of specification behind it.'],
+              ['Spring 2027 – summer 2027', 'We build to it', 'What the cohort prioritizes gets built or modified, and each diocese is configured to its own governance — parish-governed schools and diocesan schools are not the same thing and are not treated as such.'],
+              ['2027–28 fiscal year', 'You go live on it', 'Not on a product built for someone else and adapted to you. On one shaped around how your diocese actually works, with a full year of specification behind it.'],
             ].map(([when, title, body]) => (
               <div key={title} className={`${card} border-t-4 border-t-amber-800`}>
                 <p className={eyebrow}>{when}</p>
@@ -989,7 +989,37 @@ export default function LandingPage() {
               <p>The distinction runs deeper than privacy. A secular platform can only measure engagement, because measuring is all it was ever built to do — it has no stake in what happens next. Ours is built for the work the Church is actually doing: connecting a school family to OCIA, tying formation to the classroom, making sure a child preparing for Confirmation is known by the parish and the school at once. We are not here to score your parishioners. We are here to help you catechize and evangelize them.</p>
             </Faq>
             <Faq q="How long does implementation take, honestly?">
-              <p>A single parish and school pilot runs in a term. A full diocese is a multi-year program, and any vendor who tells you otherwise is selling you something. The connect-first approach means you get the unified view early without waiting for the full migration.</p>
+              <p>Longer than a vendor replacement, because that is not what this is. Changing how a diocese holds information about its people — schools, parishes, volunteers, ministries, safe environment, giving — is measured in years, and any vendor who tells you otherwise is selling you something.</p>
+              <p>That does not mean years of waiting. A pilot parish and school — or a starting group of schools or parishes — runs across one school year, and the connect-first approach gives you a unified view while migration continues underneath it.</p>
+            </Faq>
+            <Faq q="How much will this cost?">
+              <p>The Catholic Family Record is priced on the number of Catholics in the diocese, not the number of families already registered in a parish or enrolled in a school.</p>
+              <p>That is deliberate. Vendors price on registered families because that is who their systems serve — which quietly accepts that the Catholics who have drifted are not the diocese's concern. A bishop is responsible for every Catholic in his territory, not only the ones already in a database. The pricing should reflect the work, not the subset that is easy to count.</p>
+              <p>Part of the discovery session is establishing what the diocese currently spends across its separate school, parish, giving, communication, and volunteer systems — including the staff hours those systems consume between them. Most dioceses have never seen that figure in one place. It is worth knowing regardless of what you decide about the Catholic Family Record.</p>
+            </Faq>
+            <Faq q="What staff do we need to roll this out?">
+              <p>Less than most dioceses expect. The system is hosted — no servers, nothing to install, no infrastructure for IT to maintain. Schools and parishes import their own data with guided tools, and training is online and self-paced, so the technical lift on your staff is genuinely light.</p>
+              <p>What the project needs is not technical. It needs a project sponsor at the chancery with authority to settle questions that cross departments, a pastor and principal at the pilot who are willing participants rather than assigned ones, and a few hours from each department that will use the record.</p>
+              <p>The software is the easy part. Agreeing how a diocese identifies a family, which record is authoritative, and who may see what — that is the work, and it is why this takes years rather than months.</p>
+            </Faq>
+            <Faq q="What does a family experience?">
+              <p>Every family has its own login. They see their own record — their children's enrollment, their sacramental history, their giving — and they keep it current themselves. A new phone number, a change of address, a child away at college, a willingness to serve on a Saturday: all of it updates at the source rather than traveling through a parish secretary who is already underwater.</p>
+              <p>What a family may see and change is governed by the same permissions the diocese sets everywhere else. Families maintain their own contact and household information; sacramental records remain the Church's to enter and verify.</p>
+              <p>This matters more than it sounds. A parent who manages her mortgage, her pediatrician, and her child's lunch account from her phone will not call a parish office between nine and three. She is not disengaged — she has been handed the one institution in her life that still requires a phone call, and she drifts without ever deciding to. Friction is never neutral. A family that can see its own record, print its own statements, and step forward to serve without asking permission first is a family that stays.</p>
+            </Faq>
+            <Faq q="How do other diocesan ministries and departments access the record — and how are they charged?">
+              <p>Through the same CatholicLogin, with permissions the diocese defines by role. Nobody sees everything. Evangelization sees the school families already connected to the Church and today invisible to it. Communications sees current contact information without rebuilding a list. Safe environment sees clearances and expirations across every parish and school at once. Each office gets the slice its work requires, and every access is logged.</p>
+              <p>Some records cannot be shared and are not. Tribunal files, safe environment case files, and Catholic Charities client information stay with the offices that hold them. The record connects identity across the diocese; it does not pool confidential files.</p>
+              <p>There is no separate charge by department or by seat. Pricing is based on the Catholic population of the diocese and every diocesan office is included — charging per office would recreate the fragmentation the record exists to end.</p>
+            </Faq>
+            <Faq q="How many founding dioceses are you accepting?">
+              <p>Four, though the number may shift with the size of the dioceses that join. Four large archdioceses is a different commitment than four smaller ones, and we would rather size the group to what we can support well.</p>
+              <p>The system is built. OptionC has served Catholic schools for twenty years, the Parish Management System is complete, and the record connecting them is what founding partners are implementing. What the cohort shapes is how it extends into diocesan work — which offices, which reports, which ministries come next. The limit exists so each partner has direct access to the team doing that work.</p>
+            </Faq>
+            <Faq q="Do founding dioceses work together, or is each implementation separate?">
+              <p>Both. Each diocese has its own timeline, its own configuration, and a named specialist through implementation — nothing about your rollout depends on another diocese's pace.</p>
+              <p>Alongside that, the founding cohort meets by video every few weeks during the first year: what worked, what didn't, what a diocese wishes it had known before it started. There is no substitute for hearing it from another chancery rather than from us. We would expect one in-person gathering as the first year closes, though that is the cohort's decision, not ours.</p>
+              <p>Sessions are about implementation and practice, not diocesan data. Nothing about your families, finances, or internal decisions is visible to another diocese at any point.</p>
             </Faq>
             <Faq q="Can a school participate if its parish is not ready?">
               <p>Yes. Schools and parishes can each start alone. The record is built so the connection can be made later, without re-entering anything, whenever the other office is ready.</p>
