@@ -250,142 +250,37 @@ function cropCanvasToRegion(source: HTMLCanvasElement, region: Region): HTMLCanv
   return out;
 }
 
-function opaqueColor(color: string): string | null {
-  if (!color || color === "transparent" || color === "rgba(0, 0, 0, 0)") return null;
-  return color;
-}
-
-function sourceIsReadable(source: CanvasImageSource): boolean {
+function dataUrlFromDrawnSource(source: CanvasImageSource, width: number, height: number): string | null {
+  if (width < 1 || height < 1) return null;
   const probe = document.createElement("canvas");
-  probe.width = 1;
-  probe.height = 1;
+  probe.width = width;
+  probe.height = height;
   const ctx = probe.getContext("2d");
-  if (!ctx) return false;
+  if (!ctx) return null;
   try {
-    ctx.drawImage(source, 0, 0, 1, 1);
-    ctx.getImageData(0, 0, 1, 1);
-    return true;
+    ctx.drawImage(source, 0, 0, width, height);
+    return probe.toDataURL("image/png");
   } catch {
-    return false;
+    return null;
   }
 }
 
-function directText(el: HTMLElement): string {
-  if (el instanceof HTMLInputElement) {
-    if (el.type === "password") return el.value ? "••••••••" : el.placeholder;
-    if (el.type === "checkbox" || el.type === "radio" || el.type === "file" || el.type === "hidden") return "";
-    return el.value || el.placeholder;
-  }
-  if (el instanceof HTMLTextAreaElement) return el.value || el.placeholder;
-  if (el instanceof HTMLSelectElement) return el.selectedOptions[0]?.textContent?.trim() ?? "";
-  let text = "";
-  for (const node of el.childNodes) {
-    if (node.nodeType === Node.TEXT_NODE) text += node.textContent ?? "";
-  }
-  return text.replace(/\s+/g, " ").trim();
+function sanitizeCss(css: string): string {
+  return css
+    .replace(/@font-face\s*\{[\s\S]*?\}/gi, "")
+    .replace(/url\(\s*(['"]?)(?!data:)[^)]+\)/gi, "none");
 }
 
-function paintWrappedText(
-  ctx: CanvasRenderingContext2D,
-  text: string,
-  x: number,
-  y: number,
-  maxWidth: number,
-  lineHeight: number,
-  maxY: number,
-) {
-  if (!text || maxWidth <= 0 || y > maxY) return;
-  const words = text.split(" ");
-  let line = "";
-  let yy = y;
-  for (const word of words) {
-    const trial = line ? `${line} ${word}` : word;
-    if (line && ctx.measureText(trial).width > maxWidth) {
-      ctx.fillText(line, x, yy);
-      yy += lineHeight;
-      if (yy > maxY) return;
-      line = word;
-    } else {
-      line = trial;
+function collectPageCss(): string {
+  let css = "";
+  for (const sheet of Array.from(document.styleSheets)) {
+    try {
+      for (const rule of Array.from(sheet.cssRules)) css += `${rule.cssText}\n`;
+    } catch {
+      // Cross-origin stylesheets are not readable.
     }
   }
-  if (line && yy <= maxY) ctx.fillText(line, x, yy);
-}
-
-const SKIP_CAPTURE_TAGS = new Set(["SCRIPT", "STYLE", "NOSCRIPT", "LINK", "META"]);
-
-function paintElement(ctx: CanvasRenderingContext2D, el: HTMLElement, viewW: number, viewH: number) {
-  if (el.closest(".bh-rw") || SKIP_CAPTURE_TAGS.has(el.tagName)) return;
-  const style = getComputedStyle(el);
-  if (style.display === "none" || style.visibility === "hidden") return;
-  const opacity = Number(style.opacity);
-  if (!Number.isFinite(opacity) || opacity <= 0) return;
-
-  const rect = el.getBoundingClientRect();
-  ctx.save();
-  if (opacity < 1) ctx.globalAlpha *= opacity;
-
-  const visible =
-    rect.width > 0 &&
-    rect.height > 0 &&
-    rect.bottom > 0 &&
-    rect.right > 0 &&
-    rect.top < viewH &&
-    rect.left < viewW;
-
-  if (visible) {
-    const bg = opaqueColor(style.backgroundColor);
-    if (bg) {
-      ctx.fillStyle = bg;
-      ctx.fillRect(rect.left, rect.top, rect.width, rect.height);
-    }
-    const borderWidth = Number.parseFloat(style.borderTopWidth) || 0;
-    const borderColor = opaqueColor(style.borderTopColor);
-    if (borderWidth > 0 && borderColor) {
-      ctx.strokeStyle = borderColor;
-      ctx.lineWidth = borderWidth;
-      ctx.strokeRect(
-        rect.left + borderWidth / 2,
-        rect.top + borderWidth / 2,
-        Math.max(0, rect.width - borderWidth),
-        Math.max(0, rect.height - borderWidth),
-      );
-    }
-    if ((el instanceof HTMLImageElement || el instanceof HTMLCanvasElement) && sourceIsReadable(el)) {
-      ctx.drawImage(el, rect.left, rect.top, rect.width, rect.height);
-    }
-
-    const text = directText(el);
-    if (text) {
-      ctx.save();
-      ctx.beginPath();
-      ctx.rect(rect.left, rect.top, rect.width, rect.height);
-      ctx.clip();
-      ctx.fillStyle = style.color || "#111111";
-      ctx.font = style.font || `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
-      ctx.textBaseline = "top";
-      const padL = Number.parseFloat(style.paddingLeft) || 0;
-      const padT = Number.parseFloat(style.paddingTop) || 0;
-      const padR = Number.parseFloat(style.paddingRight) || 0;
-      const fontSize = Number.parseFloat(style.fontSize) || 16;
-      const lineHeight = Number.parseFloat(style.lineHeight);
-      paintWrappedText(
-        ctx,
-        text,
-        rect.left + padL,
-        rect.top + padT,
-        Math.max(0, rect.width - padL - padR),
-        Number.isFinite(lineHeight) ? lineHeight : fontSize * 1.2,
-        rect.bottom,
-      );
-      ctx.restore();
-    }
-  }
-
-  for (const child of el.children) {
-    if (child instanceof HTMLElement) paintElement(ctx, child, viewW, viewH);
-  }
-  ctx.restore();
+  return sanitizeCss(css);
 }
 
 function hideWidgetChrome(): Array<{ el: HTMLElement; visibility: string }> {
@@ -402,22 +297,97 @@ async function snapshotViewport(): Promise<HTMLCanvasElement> {
   const width = window.innerWidth;
   const height = window.innerHeight;
   const scale = Math.min(2, window.devicePixelRatio || 1);
-  const canvas = document.createElement("canvas");
-  canvas.width = Math.max(1, Math.round(width * scale));
-  canvas.height = Math.max(1, Math.round(height * scale));
-  const ctx = canvas.getContext("2d");
-  if (!ctx) throw new Error("Could not capture this page.");
-  // Paint the DOM ourselves. Drawing an SVG foreignObject taints the canvas in
-  // Chrome whenever the page uses a web font or cross-origin image, and toBlob
-  // then throws.
-  ctx.setTransform(scale, 0, 0, scale, 0, 0);
-  ctx.fillStyle =
-    opaqueColor(getComputedStyle(document.body).backgroundColor) ??
-    opaqueColor(getComputedStyle(document.documentElement).backgroundColor) ??
-    "#ffffff";
-  ctx.fillRect(0, 0, width, height);
-  paintElement(ctx, document.body, width, height);
-  return canvas;
+  const clone = document.documentElement.cloneNode(true) as HTMLElement;
+  clone.setAttribute("xmlns", "http://www.w3.org/1999/xhtml");
+  clone.querySelectorAll("script, iframe, video, audio, object, embed, .bh-rw").forEach((node) => node.remove());
+  clone.querySelectorAll('link[rel="stylesheet"], link[rel="preload"], source').forEach((node) => node.remove());
+  clone.querySelectorAll("[srcset]").forEach((node) => node.removeAttribute("srcset"));
+
+  const liveImages = Array.from(document.images).filter((img) => !img.closest(".bh-rw"));
+  clone.querySelectorAll("img").forEach((node, index) => {
+    if (!(node instanceof HTMLImageElement)) return;
+    const live = liveImages[index];
+    const inlined =
+      live instanceof HTMLImageElement
+        ? dataUrlFromDrawnSource(live, live.naturalWidth || live.width, live.naturalHeight || live.height)
+        : null;
+    if (inlined) {
+      node.src = inlined;
+      return;
+    }
+    node.removeAttribute("src");
+    node.removeAttribute("srcset");
+  });
+  clone.querySelectorAll("canvas").forEach((node) => {
+    if (!(node instanceof HTMLCanvasElement)) return;
+    const inlined = dataUrlFromDrawnSource(node, node.width, node.height);
+    const img = document.createElement("img");
+    img.width = node.width;
+    img.height = node.height;
+    img.setAttribute("style", node.getAttribute("style") ?? "");
+    if (inlined) img.src = inlined;
+    node.replaceWith(img);
+  });
+  clone.querySelectorAll("[style]").forEach((node) => {
+    const style = node.getAttribute("style");
+    if (style) node.setAttribute("style", sanitizeCss(style));
+  });
+
+  const liveInputs = Array.from(document.querySelectorAll("input, textarea, select"));
+  clone.querySelectorAll("input, textarea, select").forEach((node, index) => {
+    const live = liveInputs[index];
+    if (node instanceof HTMLInputElement && live instanceof HTMLInputElement) {
+      if (live.type === "checkbox" || live.type === "radio") node.checked = live.checked;
+      else if (live.type === "password") node.value = live.value ? "••••••••" : "";
+      else node.value = live.value;
+      if (node.checked) node.setAttribute("checked", "");
+      else node.removeAttribute("checked");
+      node.setAttribute("value", node.value);
+    }
+    if (node instanceof HTMLTextAreaElement && live instanceof HTMLTextAreaElement) {
+      node.value = live.value;
+      node.textContent = live.value;
+    }
+    if (node instanceof HTMLSelectElement && live instanceof HTMLSelectElement) {
+      node.value = live.value;
+      Array.from(node.options).forEach((option, optionIndex) => {
+        option.selected = live.options[optionIndex]?.selected ?? false;
+      });
+    }
+  });
+
+  const style = document.createElement("style");
+  style.textContent = `${collectPageCss()}\n*{font-family:ui-sans-serif,system-ui,sans-serif !important;}`;
+  (clone.querySelector("head") ?? clone).appendChild(style);
+  clone.style.margin = "0";
+  clone.style.transform = `translate(${-window.scrollX}px, ${-window.scrollY}px)`;
+
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}"><foreignObject width="${width}" height="${height}">${new XMLSerializer().serializeToString(clone)}</foreignObject></svg>`;
+  const url = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml;charset=utf-8" }));
+  try {
+    const image = new Image();
+    image.decoding = "sync";
+    await new Promise<void>((resolve, reject) => {
+      image.onload = () => resolve();
+      image.onerror = () => reject(new Error("Could not capture this page. Please attach a screenshot instead."));
+      image.src = url;
+    });
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.max(1, Math.round(width * scale));
+    canvas.height = Math.max(1, Math.round(height * scale));
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("Could not capture this page.");
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+    ctx.getImageData(0, 0, 1, 1);
+    return canvas;
+  } catch (err) {
+    if (err instanceof Error && err.message.includes("attach a screenshot")) throw err;
+    throw new Error("Could not capture this page. Please attach a screenshot instead.");
+  } finally {
+    URL.revokeObjectURL(url);
+  }
 }
 
 async function capturePageRegion(region: Region): Promise<File> {
