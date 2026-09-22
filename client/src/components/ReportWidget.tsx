@@ -56,7 +56,7 @@ type Category = {
 };
 
 const FONT = "ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif";
-const MAX_SCREENSHOT_BYTES = 2 * 1024 * 1024;
+const MAX_SCREENSHOT_BYTES = 5 * 1024 * 1024;
 const PHONE_PATTERN = /^[\d\s()+.-]{7,30}$/;
 const BUSY_SELECTOR = '[role="dialog"], [role="alertdialog"], [aria-modal="true"], [data-toast]';
 const FOCUSABLE =
@@ -207,7 +207,7 @@ async function fileToDataUrl(file: File): Promise<string> {
 
 function screenshotError(file: File): string | null {
   if (!file.type.startsWith("image/")) return "Please attach a PNG or JPEG screenshot.";
-  if (file.size > MAX_SCREENSHOT_BYTES) return "Screenshots must be under 2 MB.";
+  if (file.size > MAX_SCREENSHOT_BYTES) return "Screenshots must be 5 MB or smaller.";
   return null;
 }
 
@@ -224,7 +224,7 @@ async function canvasToPngFile(canvas: HTMLCanvasElement, name: string): Promise
     canvas.toBlob((next) => (next ? resolve(next) : reject(new Error("Could not capture this page."))), "image/png");
   });
   if (blob.size > MAX_SCREENSHOT_BYTES) {
-    throw new Error("The capture was over 2 MB. Please attach a smaller screenshot.");
+    throw new Error("The capture was over 5 MB. Please attach a smaller screenshot.");
   }
   return new File([blob], name, { type: "image/png" });
 }

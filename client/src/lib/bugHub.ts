@@ -63,16 +63,18 @@ function parseWhere(stack?: string): BugReportPayload["where"] {
 }
 
 export async function submitBugReport(payload: BugReportPayload): Promise<BugReportResult> {
+  const body = JSON.stringify({
+    ...payload,
+    page_url: payload.page_url ?? window.location.href,
+    source: payload.source ?? "manual",
+    kind: payload.kind ?? "bug",
+  });
   const res = await fetch("/api/bug-reports", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      ...payload,
-      page_url: payload.page_url ?? window.location.href,
-      source: payload.source ?? "manual",
-      kind: payload.kind ?? "bug",
-    }),
-    keepalive: true,
+    body,
+    // Browsers reject keepalive bodies over 64 KiB, which drops every screenshot.
+    keepalive: body.length <= 60_000,
   });
   if (!res.ok) {
     const text = await res.text();

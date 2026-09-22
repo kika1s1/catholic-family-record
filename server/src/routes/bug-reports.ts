@@ -25,7 +25,7 @@ const bodySchema = z.object({
       function: z.string().optional(),
     })
     .optional(),
-    screenshot_base64: z.string().max(3_500_000).optional().or(z.literal("")),
+    screenshot_base64: z.string().max(7_200_000).optional().or(z.literal("")),
 })
   // Anything a person typed must carry a reply address, because the team
   // answers submissions by email. Auto-captured errors have no author.
