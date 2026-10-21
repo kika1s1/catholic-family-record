@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react'
+import { Menu, Plus, X } from 'lucide-react'
 import {
   btn,
   btnGhost,
@@ -20,8 +21,17 @@ import {
   sectionHeadCenter,
   sectionWash,
   wrap,
-} from '../components/landing/tw'
+} from '../components/landing/tw.ts'
 const CONTACT_EMAIL = 'CatholicInnovation@OptionC.com'
+
+const NAV_LINKS = [
+  ['#problem', 'The problem'],
+  ['#today', 'What exists'],
+  ['#parish', 'Parish & school'],
+  ['#diocese', 'Diocese'],
+  ['#replace', 'Replacing your stack'],
+  ['#founding', 'Founding program'],
+] as const
 
 let pageViewSent = false
 let formStartSent = false
@@ -57,15 +67,15 @@ function CostItem({
 }) {
   return (
     <div className="grid gap-2 border-b border-stone-200 py-6 md:grid-cols-[15rem_1fr] md:gap-8">
-      <dt className="font-serif text-xl text-slate-900">
+      <dt className="font-serif text-lg text-slate-900 sm:text-xl">
         {title}
         {note ? (
-          <span className="mt-1 block text-base font-semibold uppercase tracking-wide text-amber-800">
+          <span className="mt-1 block text-xs font-semibold uppercase tracking-wider text-amber-800">
             {note}
           </span>
         ) : null}
       </dt>
-      <dd className="text-lg leading-relaxed text-slate-600">{children}</dd>
+      <dd className="text-base leading-relaxed text-slate-600">{children}</dd>
     </div>
   )
 }
@@ -85,8 +95,8 @@ function StageCard({
     <div className={`${card} border-t-4 border-t-amber-800`} data-reveal>
       <p className={eyebrow}>{kicker}</p>
       <h3 className={`${heading3} mt-3`}>{title}</h3>
-      <p className="mt-2 text-lg text-slate-600">{intro}</p>
-      <ul className="mt-4 space-y-2 text-lg text-slate-800">
+      <p className="mt-2 text-base text-slate-600">{intro}</p>
+      <ul className="mt-4 space-y-2 text-base text-slate-800">
         {items.map((item) => (
           <li key={item} className="relative pl-5 before:absolute before:left-0 before:top-2.5 before:h-1.5 before:w-1.5 before:rounded-full before:bg-amber-800">
             {item}
@@ -115,25 +125,26 @@ function Callout({ kicker, title, children }: { kicker: string; title: string; c
     <div className={`${callout} ${narrow}`}>
       <p className={eyebrow}>{kicker}</p>
       <h3 className={`${heading3} mt-2`}>{title}</h3>
-      <div className="mt-3 space-y-3 text-lg leading-relaxed text-slate-600">{children}</div>
+      <div className="mt-3 space-y-3 text-base leading-relaxed text-slate-600">{children}</div>
     </div>
   )
 }
 
 function Faq({ q, children }: { q: string; children: ReactNode }) {
   return (
-    <details className="border-b border-stone-200">
-      <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-5 font-serif text-xl text-slate-900 marker:content-none [&::-webkit-details-marker]:hidden">
+    <details className="landing-faq border-b border-stone-200">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-4 font-serif text-lg text-slate-900 marker:content-none sm:text-xl [&::-webkit-details-marker]:hidden">
         {q}
-        <span className="text-2xl text-amber-800">+</span>
+        <Plus className="landing-faq-icon" size={20} strokeWidth={1.5} aria-hidden="true" />
       </summary>
-      <div className="max-w-3xl space-y-3 pb-5 text-lg leading-relaxed text-slate-600">{children}</div>
+      <div className="max-w-3xl space-y-3 pb-5 text-base leading-relaxed text-slate-600">{children}</div>
     </details>
   )
 }
 
 export default function LandingPage() {
   const rootRef = useRef<HTMLDivElement>(null)
+  const [navOpen, setNavOpen] = useState(false)
   const [note, setNote] = useState({ text: '', ok: false })
   const [btnLabel, setBtnLabel] = useState('Request a Discovery Session')
   const [btnDisabled, setBtnDisabled] = useState(false)
@@ -229,27 +240,55 @@ export default function LandingPage() {
 
   return (
     <div ref={rootRef} className={page}>
-      <nav className="sticky top-0 z-50 border-b border-stone-200 bg-stone-50/95 backdrop-blur">
-        <div className="flex min-h-[68px] items-center gap-4 px-4 sm:px-6">
-          <div className="min-w-0 shrink font-serif text-lg font-semibold text-slate-900 sm:text-xl">
-            The Catholic Family <span className="text-amber-800">Record</span>
+      <nav className="landing-nav sticky top-0 z-50" aria-label="Main navigation">
+        <div className="landing-nav-inner">
+          <div className="landing-brand min-w-0 font-serif font-semibold text-slate-900">
+            <span className="whitespace-nowrap sm:hidden">Catholic Family <span className="text-amber-800">Record</span></span>
+            <span className="hidden whitespace-nowrap sm:inline">The Catholic Family <span className="text-amber-800">Record</span></span>
           </div>
           <div className="ml-auto hidden items-center gap-5 text-slate-600 xl:flex">
-            <a className={navLink} href="#problem">The problem</a>
-            <a className={navLink} href="#today">What exists</a>
-            <a className={navLink} href="#parish">Parish &amp; school</a>
-            <a className={navLink} href="#diocese">Diocese</a>
-            <a className={navLink} href="#replace">Replacing your stack</a>
-            <a className={navLink} href="#founding">Founding program</a>
+            {NAV_LINKS.map(([href, label]) => (
+              <a key={href} className={navLink} href={href}>{label}</a>
+            ))}
           </div>
-          <a className={`${btn} ml-auto shrink-0 xl:ml-0`} href="#talk">
+          <a
+            className={`${btn} landing-nav-cta ml-auto hidden shrink-0 sm:inline-flex xl:ml-0`}
+            href="#talk"
+          >
             Discuss a partnership
           </a>
+          <button
+            type="button"
+            className="ml-auto inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-stone-300 text-slate-800 sm:ml-0 xl:hidden"
+            aria-controls="landing-mobile-menu"
+            aria-expanded={navOpen}
+            aria-label={navOpen ? 'Close menu' : 'Open menu'}
+            onClick={() => setNavOpen((open) => !open)}
+          >
+            {navOpen ? <X size={18} /> : <Menu size={18} />}
+          </button>
         </div>
+        {navOpen ? (
+          <div id="landing-mobile-menu" className="landing-mobile-menu border-t border-stone-200 px-6 py-2 xl:hidden">
+            {NAV_LINKS.map(([href, label]) => (
+              <a
+                key={href}
+                className="block border-b border-stone-200 py-3 text-base text-slate-800 no-underline"
+                href={href}
+                onClick={() => setNavOpen(false)}
+              >
+                {label}
+              </a>
+            ))}
+            <a className={`${btn} my-3 w-full sm:hidden`} href="#talk" onClick={() => setNavOpen(false)}>
+              Discuss a partnership
+            </a>
+          </div>
+        ) : null}
       </nav>
 
-      <header className="bg-stone-50 pb-6 pt-16 sm:pt-20">
-        <div className={wrap}>
+      <header className="landing-hero">
+        <div className={`${wrap} landing-hero-inner`}>
           <p className={eyebrow}>OptionC · Serving Catholic schools and parishes for over 20 years</p>
           <h1 className={heading1}>
             Your diocese knows every family. <span className="italic text-amber-800">In pieces.</span>
@@ -260,19 +299,19 @@ export default function LandingPage() {
             wrong — and no one can see the family whole. The Catholic Family Record makes them one,
             and gives your staff back the hours that fragmentation quietly costs.
           </p>
-          <div className="mt-10 grid max-w-3xl gap-4 sm:grid-cols-2">
-            <a className={card} href="#parish">
-              <span className={`${eyebrow} block`}>Start here</span>
-              <span className="mt-1 block font-serif text-2xl text-slate-900">I lead a parish or a school</span>
-              <span className="mt-1 block text-lg text-slate-500">The office work this ends, starting Monday</span>
+          <div className="landing-audiences">
+            <a className="landing-audience" href="#parish">
+              <span className="landing-audience-label">Start here</span>
+              <span className="landing-audience-title">I lead a parish or a school</span>
+              <span className="landing-audience-description">The office work this ends, starting Monday</span>
             </a>
-            <a className={card} href="#diocese">
-              <span className={`${eyebrow} block`}>Start here</span>
-              <span className="mt-1 block font-serif text-2xl text-slate-900">I lead a diocese</span>
-              <span className="mt-1 block text-lg text-slate-500">What fragmentation costs every chancery office</span>
+            <a className="landing-audience" href="#diocese">
+              <span className="landing-audience-label">Start here</span>
+              <span className="landing-audience-title">I lead a diocese</span>
+              <span className="landing-audience-description">What fragmentation costs every chancery office</span>
             </a>
           </div>
-          <p className="mt-12 border-t border-stone-200 py-4 text-base font-semibold uppercase tracking-wide text-slate-500">
+          <p className="landing-hero-signoff">
             One family · One record · One faith
           </p>
         </div>
@@ -290,7 +329,7 @@ export default function LandingPage() {
           </SectionHead>
 
           <div className="overflow-hidden rounded-lg border border-stone-200 bg-white" data-reveal>
-            <div className="flex justify-between bg-stone-100 px-5 py-3 text-base font-semibold uppercase tracking-wide text-slate-600">
+            <div className="flex flex-col gap-1 bg-stone-100 px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 sm:flex-row sm:items-baseline sm:justify-between sm:text-sm">
               <span>Register of entry — one household</span>
               <span>Tuesday</span>
             </div>
@@ -308,7 +347,7 @@ export default function LandingPage() {
                 <span className="text-base text-slate-500 sm:text-right">{time}</span>
               </div>
             ))}
-            <p className="bg-amber-50 px-5 py-4 text-lg text-amber-950">
+            <p className="bg-amber-50 px-5 py-4 text-base text-amber-950">
               Six entries. One misspelling that will never be caught. When Anna's mobile number
               changes in March, five of these six will still be wrong in June — including the one
               the school would use in an emergency.
@@ -316,7 +355,7 @@ export default function LandingPage() {
           </div>
 
           <div className="mt-5 overflow-hidden rounded-lg border border-stone-200 bg-white" data-reveal>
-            <div className="flex justify-between bg-stone-100 px-5 py-3 text-base font-semibold uppercase tracking-wide text-slate-600">
+            <div className="flex flex-col gap-1 bg-stone-100 px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 sm:flex-row sm:items-baseline sm:justify-between sm:text-sm">
               <span>With the Catholic Family Record</span>
               <span>Tuesday</span>
             </div>
@@ -325,7 +364,7 @@ export default function LandingPage() {
               <span className="font-serif text-xl font-semibold text-slate-900">Kowalski, Anna &amp; Michael</span>
               <span className="text-base text-slate-500 sm:text-right">9:40 a.m.</span>
             </div>
-            <p className="bg-amber-50 px-5 py-4 text-lg text-amber-950">
+            <p className="bg-amber-50 px-5 py-4 text-base text-amber-950">
               Enrollment, parish registration, tuition, giving, alerts, and volunteering all read
               the same record. Anna changes her number once, in March, and every office has it that
               afternoon.
@@ -413,9 +452,10 @@ export default function LandingPage() {
             is moving. The record belongs to the family, not the institution, and every office sees
             only what it has a reason to see.
           </SectionHead>
-          <div className="overflow-x-auto" data-reveal>
-            <table className="min-w-[40rem] w-full border border-stone-200 bg-white text-lg">
-              <thead className="bg-stone-100 text-base font-semibold uppercase tracking-wide text-slate-600">
+          <p className="mb-2 text-xs text-slate-500 md:hidden">Swipe sideways to see every column.</p>
+          <div className="landing-table-scroll overflow-x-auto" role="region" aria-label="Information sharing permissions" tabIndex={0} data-reveal>
+            <table className="w-full min-w-[40rem] border border-stone-200 bg-white text-sm">
+              <thead className="bg-stone-100 text-xs font-semibold uppercase tracking-wider text-slate-600">
                 <tr>
                   <th className="px-3 py-3 text-left">Information</th>
                   <th className="px-3 py-3">The family</th>
@@ -477,7 +517,7 @@ export default function LandingPage() {
               </tbody>
             </table>
           </div>
-          <p className={`${narrow} mt-6 text-center text-lg text-slate-600`}>
+          <p className={`${narrow} mt-6 text-center text-base text-slate-600`}>
             Scope is enforced in the data layer, not hidden in the interface, and every access is
             logged. A pastor can see precisely who opened his families' records and when.
           </p>
@@ -542,7 +582,7 @@ export default function LandingPage() {
               Nationally, volunteers donate to charity at roughly twice the rate of non-volunteers —
               about 80 percent, against 40 percent of non-volunteers.
             </p>
-            <p className="mt-3 text-lg text-slate-600">
+            <p className="mt-3 text-base text-slate-600">
               Service and generosity tend to travel together. Yet in most parishes the ministry
               roster and the offertory record sit in systems that have never been introduced, so a
               parish cannot easily thank, form, or invite the people already giving it their
@@ -640,7 +680,7 @@ export default function LandingPage() {
             Most systems hold one slice of a Catholic life. The Catholic Family Record holds the
             journey — in the order it actually happens.
           </SectionHead>
-          <div className="mx-auto max-w-4xl">
+          <div className="mx-auto hidden max-w-4xl md:block">
             <svg viewBox="0 0 880 640" role="img" xmlns="http://www.w3.org/2000/svg" className="h-auto w-full">
               <title>The Catholic family lifecycle, conception through legacy</title>
               <desc>
@@ -712,7 +752,7 @@ export default function LandingPage() {
               <text x="266" y="191" textAnchor="end" className="fill-slate-500" fontSize="13">A lifetime given, a good death</text>
             </svg>
           </div>
-          <p className="mx-auto mt-2 max-w-2xl text-center text-lg italic text-slate-600">
+          <p className="mx-auto mt-2 hidden max-w-2xl text-center text-base italic text-slate-600 md:block">
             The ring does not end at stage eight. A family formed there conceives the next generation
             at stage one — and three generations meet in the same record.
           </p>
@@ -729,8 +769,8 @@ export default function LandingPage() {
             ].map(([n, title, body, wash, tag]) => (
               <div key={String(n)} className={`p-5 ${wash ? 'bg-stone-100' : 'bg-white'}`}>
                 <span className="block text-base font-semibold tracking-wide text-amber-800">{n}</span>
-                <h4 className="mt-2 font-serif text-xl text-slate-900">{title}</h4>
-                <p className="mt-2 text-lg text-slate-600">{body}</p>
+                <h3 className="mt-2 font-serif text-xl text-slate-900">{title}</h3>
+                <p className="mt-2 text-base text-slate-600">{body}</p>
                 {tag ? (
                   <span className={`mt-3 inline-block rounded px-2 py-1 text-sm font-semibold uppercase tracking-wide ${tag === 'The CFR moment' ? 'bg-amber-800 text-white' : 'bg-amber-100 text-amber-900'}`}>
                     {tag}
@@ -739,7 +779,7 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
-          <div className="mt-6 flex flex-wrap justify-center gap-6 text-base text-slate-600">
+          <div className="mt-6 hidden flex-wrap justify-center gap-6 text-sm text-slate-600 md:flex">
             <span className="inline-flex items-center gap-2">
               <i className="inline-block h-3 w-3 rounded-full bg-amber-800" aria-hidden="true" />
               Sacramental milestone
@@ -806,7 +846,7 @@ export default function LandingPage() {
               ]}
             />
           </div>
-          <p className={`${narrow} mt-6 text-center text-lg text-slate-600`}>
+          <p className={`${narrow} mt-6 text-center text-base text-slate-600`}>
             Everything in the third column is why a founding cohort exists. You are not buying it as
             it stands. You are deciding what it becomes.
           </p>
@@ -838,10 +878,10 @@ export default function LandingPage() {
             <div className="mx-auto my-0 h-8 w-px bg-stone-300" aria-hidden="true" />
             <div className="rounded-lg bg-slate-900 px-6 py-8 text-center text-white">
               <p className="font-serif text-2xl sm:text-3xl">One Catholic Family Record</p>
-              <p className="mt-2 text-lg text-stone-200">The record beneath every function. Functions can be many. The record cannot.</p>
+              <p className="mt-2 text-base text-stone-200">The record beneath every function. Functions can be many. The record cannot.</p>
             </div>
           </div>
-          <p className={`${narrow} mt-6 text-center text-lg text-slate-600`}>
+          <p className={`${narrow} mt-6 text-center text-base text-slate-600`}>
             This is the whole architecture. Tools are plural by nature — offices need different ones
             and change them over time. A family is singular. The moment you have two records for one
             family, every problem on this page follows, and no amount of good software inside any one
@@ -897,8 +937,8 @@ export default function LandingPage() {
             ].map(([when, title, body]) => (
               <div key={title} className={`${card} border-t-4 border-t-amber-800`}>
                 <p className={eyebrow}>{when}</p>
-                <h4 className={`${heading3} mt-2`}>{title}</h4>
-                <p className="mt-2 text-lg text-slate-600">{body}</p>
+                <h3 className={`${heading3} mt-2`}>{title}</h3>
+                <p className="mt-2 text-base text-slate-600">{body}</p>
               </div>
             ))}
           </div>
@@ -954,8 +994,8 @@ export default function LandingPage() {
                 ['A pilot, not a leap', 'Begin with one parish and one school. Expand only when it has proven itself.', false],
               ].map(([title, body, lead]) => (
                 <div key={String(title)} className={`rounded-lg border p-5 ${lead ? 'border-amber-300 bg-amber-50' : 'border-stone-200 bg-stone-50'}`}>
-                  <h4 className={`text-lg font-bold ${lead ? 'text-amber-900' : 'text-slate-900'}`}>{title}</h4>
-                  <p className="mt-1 text-lg text-slate-600">{body}</p>
+                  <h3 className={`text-base font-semibold sm:text-lg ${lead ? 'text-amber-900' : 'text-slate-900'}`}>{title}</h3>
+                  <p className="mt-1 text-base text-slate-600">{body}</p>
                 </div>
               ))}
             </div>
@@ -1031,10 +1071,10 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className={section} id="talk">
+      <section className={`${section} landing-contact`} id="talk">
         <div className={wrap}>
           <div className="grid gap-12 lg:grid-cols-2">
-            <div>
+            <div className="landing-contact-copy">
               <p className={eyebrow}>The next step</p>
               <h2 className={heading2}>See your diocese whole.</h2>
               <p className={`${lede} mb-6`}>
@@ -1043,13 +1083,13 @@ export default function LandingPage() {
                 institution, and every office that currently keeps its own list. Ninety minutes,
                 built around your diocese, not a demo reel.
               </p>
-              <p className="text-lg leading-8 text-slate-600">
+              <p className="text-base leading-7 text-slate-600">
                 CatholicInnovation@OptionC.com
                 <br />
                 855.822.8418
               </p>
             </div>
-            <form id="dsform" noValidate onSubmit={onSubmit} onFocus={onFormFocus}>
+            <form className="landing-form" id="dsform" noValidate onSubmit={onSubmit} onFocus={onFormFocus}>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label className={fieldLabel} htmlFor="n">Name</label>
@@ -1086,7 +1126,7 @@ export default function LandingPage() {
               <button className={`${btn} mt-4 w-full disabled:cursor-not-allowed disabled:opacity-70`} type="submit" disabled={btnDisabled}>
                 {btnLabel}
               </button>
-              <p id="dsnote" className={`mt-3 min-h-6 text-lg ${note.ok ? 'text-green-800' : 'text-red-800'}`} role="status">
+              <p id="dsnote" className={`mt-3 min-h-6 text-base ${note.ok ? 'text-green-800' : 'text-red-800'}`} role="status">
                 {note.text}
               </p>
             </form>
@@ -1094,7 +1134,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <footer className="border-t border-stone-200 bg-stone-100 py-10 text-center text-lg text-slate-600">
+      <footer className="landing-footer text-center text-base">
         <div className={wrap}>
           <p className="mb-2 font-serif text-xl text-slate-900">One family. One record. One faith.</p>
           <p>Serving Catholic schools and parishes for over 20 years · optionc.com</p>

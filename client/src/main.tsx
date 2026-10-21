@@ -1,9 +1,9 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import App from "./App";
+import App from "./App.tsx";
 import { AutoCapture } from "./components/AutoCapture";
 import { BugErrorBoundary } from "./components/BugErrorBoundary";
-import { ReportWidget } from "./components/ReportWidget";
+import { ReportWidget } from "./components/ReportWidget.tsx";
 import "./index.css";
 
 createRoot(document.getElementById("root")!).render(

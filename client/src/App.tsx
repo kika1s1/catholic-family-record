@@ -2,7 +2,7 @@ import { lazy, Suspense } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
-import LandingPage from "./pages/LandingPage";
+import LandingPage from "./pages/LandingPage.tsx";
 import LoginPage from "./pages/LoginPage";
 
 const DashboardShell = lazy(() =>

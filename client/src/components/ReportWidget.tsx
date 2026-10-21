@@ -55,7 +55,7 @@ type Category = {
   next: string;
 };
 
-const FONT = "ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif";
+const FONT = '"Source Sans 3", ui-sans-serif, system-ui, sans-serif';
 const MAX_SCREENSHOT_BYTES = 5 * 1024 * 1024;
 const PHONE_PATTERN = /^[\d\s()+.-]{7,30}$/;
 const BUSY_SELECTOR = '[role="dialog"], [role="alertdialog"], [aria-modal="true"], [data-toast]';
@@ -448,7 +448,7 @@ export type ReportWidgetProps = {
 };
 
 export function ReportWidget({
-  accent = "#0f766e",
+  accent = "#0f172a",
   label = "Help",
   defaultEmail,
 }: ReportWidgetProps) {
@@ -1124,9 +1124,9 @@ const WIDGET_CSS = `
 .bh-rw-launcher {
   position: fixed; right: 16px; bottom: 16px; z-index: 2147483001;
   border: 1px solid rgba(15, 23, 42, 0.08);
-  background: var(--bh-accent, #0f766e); color: #fff;
-  border-radius: 999px; padding: 0.7rem 1.15rem; min-height: 44px;
-  font: inherit; font-weight: 600; cursor: pointer;
+  background: var(--bh-accent, #0f172a); color: #fff;
+  border-radius: 999px; padding: 0.4rem 0.85rem; min-height: 36px;
+  font: inherit; font-size: 13px; font-weight: 600; cursor: pointer;
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.16);
 }
 .bh-rw-launcher:hover { filter: brightness(1.05); }
