@@ -83,6 +83,13 @@ export function createApp() {
       res: express.Response,
       _next: express.NextFunction,
     ) => {
+      // Malformed or oversized bodies (often from vulnerability scanners) are
+      // client errors, not server bugs; don't report them to Bug Hub.
+      const status = (err as { status?: number })?.status;
+      if (typeof status === "number" && status >= 400 && status < 500) {
+        res.status(status).json({ error: status === 413 ? "Payload too large" : "Bad request" });
+        return;
+      }
       console.error(err);
       reportServerError(err, req);
       res.status(500).json({ error: "Internal server error" });
