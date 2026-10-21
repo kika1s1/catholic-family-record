@@ -7,11 +7,16 @@ const STATUS_CLASS: Record<string, string> = {
   archived: "bg-stone-200 text-stone-700",
 };
 
+export function statusLabel(status: string): string {
+  if (!status) return "";
+  return status.charAt(0).toUpperCase() + status.slice(1);
+}
+
 export function StatusPill({ status }: { status: string }) {
   const cls = STATUS_CLASS[status] ?? STATUS_CLASS.closed;
   return (
-    <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize ${cls}`}>
-      {status}
+    <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${cls}`}>
+      {statusLabel(status)}
     </span>
   );
 }

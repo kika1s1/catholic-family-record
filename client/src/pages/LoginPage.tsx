@@ -23,7 +23,7 @@ function BrandLogo() {
           />
         </svg>
       </span>
-      <span className="font-serif text-xl font-semibold">
+      <span className="font-serif text-base font-semibold leading-tight sm:text-xl">
         The Catholic Family <span className="text-amber-300">Record</span>
       </span>
     </Link>
@@ -64,29 +64,29 @@ export default function LoginPage() {
 
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
-      <aside className="flex bg-slate-900 px-8 py-10 text-white lg:px-14 lg:py-16">
-        <div className="flex w-full max-w-lg flex-col justify-between">
+      <aside className="bg-slate-900 px-6 py-5 text-white lg:flex lg:px-14 lg:py-16">
+        <div className="flex w-full max-w-lg flex-col lg:min-h-full lg:justify-between">
           <BrandLogo />
-          <div className="mt-12">
-            <p className="text-sm font-semibold uppercase tracking-wide text-amber-300">Admin console</p>
+          <div className="mt-10 hidden lg:block">
+            <p className="text-xs font-semibold uppercase tracking-wider text-amber-300">Admin console</p>
             <h1 className="mt-3 font-serif text-4xl font-semibold leading-tight">
               Review leads and landing activity.
             </h1>
-            <p className="mt-4 text-lg leading-relaxed text-slate-300">
+            <p className="mt-4 text-base leading-relaxed text-slate-300">
               Sign in to review Discovery Session requests and activity from the
               landing page — roles, organizations, and pipeline status.
             </p>
           </div>
-          <p className="mt-12 text-sm text-slate-400">
+          <p className="mt-10 hidden text-sm text-slate-400 lg:block">
             Serving Catholic schools and parishes for over 20 years
           </p>
         </div>
       </aside>
 
-      <section className="flex items-center bg-stone-50 px-6 py-12 sm:px-10">
+      <section className="flex items-start bg-stone-50 px-6 py-10 pb-28 sm:px-10 lg:items-center">
         <div className="mx-auto w-full max-w-md">
-          <p className="text-sm font-semibold uppercase tracking-wide text-amber-800">Admin access</p>
-          <h2 className="mt-2 font-serif text-3xl font-semibold text-slate-900">Sign in</h2>
+          <p className="text-xs font-semibold uppercase tracking-wider text-amber-800">Admin access</p>
+          <h2 className="mt-2 font-serif text-2xl font-semibold text-slate-900 sm:text-3xl">Sign in</h2>
           <p className="mt-2 text-base text-slate-600">
             Use your admin credentials to open the operations dashboard.
           </p>

@@ -125,7 +125,7 @@ export default function ProfilePage() {
       <header className={pageHead}>
         <div>
           <p className={eyebrow}>Account</p>
-          <h1 className="mt-1 font-serif text-3xl font-semibold text-slate-900">Profile settings</h1>
+          <h1 className="mt-1 font-serif text-2xl font-semibold text-slate-900 sm:text-3xl">Profile settings</h1>
           <p className="mt-1 text-slate-600">Update your display name and console password.</p>
         </div>
       </header>

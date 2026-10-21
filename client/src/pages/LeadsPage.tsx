@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { format, parseISO } from "date-fns";
 import { api, type Lead } from "../lib/api";
-import { StatusPill } from "../components/ui/StatusPill";
+import { StatusPill, statusLabel } from "../components/ui/StatusPill";
 import { card, eyebrow, fieldInput, pageHead } from "../components/ui/classes";
 
 const STATUSES = ["new", "contacted", "qualified", "scheduled", "closed", "archived"];
@@ -79,7 +79,7 @@ export default function LeadsPage() {
       <header className={pageHead}>
         <div>
           <p className={eyebrow}>Inbound</p>
-          <h1 className="mt-1 font-serif text-3xl font-semibold text-slate-900">
+          <h1 className="mt-1 font-serif text-2xl font-semibold text-slate-900 sm:text-3xl">
             Discovery Session requests
           </h1>
           <p className="mt-1 text-slate-600">
@@ -98,10 +98,10 @@ export default function LeadsPage() {
               <input
                 type="search"
                 aria-label="Search inquiries"
-                placeholder="e.g. Margaret Chen, St. Mary's, or pastor@"
+                placeholder="Name, parish, or email"
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
-                className={`${fieldInput} sm:w-64`}
+                className={`${fieldInput} w-full sm:w-64`}
               />
               <select
                 aria-label="Filter by status"
@@ -112,7 +112,7 @@ export default function LeadsPage() {
                 <option value="">All statuses</option>
                 {STATUSES.map((s) => (
                   <option key={s} value={s}>
-                    {s}
+                    {statusLabel(s)}
                   </option>
                 ))}
               </select>
@@ -124,8 +124,33 @@ export default function LeadsPage() {
           ) : items.length === 0 ? (
             <div className="py-12 text-center text-slate-500">No inquiries match these filters.</div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[40rem] text-left text-sm">
+            <>
+            <ul className="divide-y divide-stone-100 md:hidden">
+              {items.map((lead) => (
+                <li key={lead.id}>
+                  <button
+                    type="button"
+                    className={`w-full py-3 text-left ${lead.id === selectedId ? "bg-amber-50" : ""}`}
+                    onClick={() => setSelectedId(lead.id)}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="font-medium text-slate-900">{lead.name}</div>
+                        <div className="truncate text-sm text-slate-500">{lead.email}</div>
+                      </div>
+                      <StatusPill status={lead.status} />
+                    </div>
+                    <p className="mt-1 text-sm text-slate-700">{lead.organization}</p>
+                    <p className="mt-1 text-sm text-slate-500">
+                      {lead.role} ·{" "}
+                      {format(parseISO(lead.created_at.replace(" ", "T") + "Z"), "MMM d, yyyy")}
+                    </p>
+                  </button>
+                </li>
+              ))}
+            </ul>
+            <div className="hidden overflow-x-auto md:block">
+              <table className="w-full text-left text-sm">
                 <thead className="border-b border-stone-200 text-xs font-semibold uppercase tracking-wide text-slate-500">
                   <tr>
                     <th className="px-3 py-3">Contact</th>
@@ -164,6 +189,7 @@ export default function LeadsPage() {
                 </tbody>
               </table>
             </div>
+            </>
           )}
         </section>
 
@@ -206,7 +232,7 @@ export default function LeadsPage() {
                 >
                   {STATUSES.map((s) => (
                     <option key={s} value={s}>
-                      {s}
+                      {statusLabel(s)}
                     </option>
                   ))}
                 </select>

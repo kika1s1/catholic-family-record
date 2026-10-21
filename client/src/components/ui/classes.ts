@@ -1,7 +1,7 @@
 /** Shared Tailwind class names for login and the admin console. */
 
 export const fieldLabel =
-  "mb-1.5 block text-sm font-semibold uppercase tracking-wide text-slate-600";
+  "mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-600";
 
 export const fieldInput =
   "w-full rounded-md border border-stone-300 bg-white px-3 py-2.5 text-base text-slate-800 placeholder:text-slate-400 focus:border-amber-800 focus:outline-none focus:ring-2 focus:ring-amber-800 disabled:bg-stone-100 disabled:text-slate-500";
@@ -12,7 +12,7 @@ export const btn =
 export const pageHead = "mb-8 flex flex-wrap items-end justify-between gap-4";
 
 export const eyebrow =
-  "text-sm font-semibold uppercase tracking-wide text-amber-800";
+  "text-xs font-semibold uppercase tracking-wider text-amber-800";
 
 export const card =
   "rounded-lg border border-stone-200 bg-white p-6 shadow-sm";

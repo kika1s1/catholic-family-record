@@ -81,7 +81,7 @@ export function DashboardShell() {
         >
           {menuOpen ? <X size={20} /> : <Menu size={20} />}
         </button>
-        <div className="font-serif text-base font-semibold text-slate-900">
+        <div className="truncate font-serif text-base font-semibold text-slate-900">
           Catholic Family <span className="text-amber-800">Record</span>
         </div>
       </header>
@@ -102,8 +102,10 @@ export function DashboardShell() {
         }`}
       >
         <div className="border-b border-slate-800 px-5 py-6">
-          <div className="font-serif text-lg font-semibold text-white">
-            The Catholic Family <span className="text-amber-300">Record</span>
+          <div className="font-serif text-[15px] font-semibold leading-snug text-white">
+            The Catholic
+            <br />
+            Family <span className="text-amber-300">Record</span>
           </div>
           <div className="mt-1 text-xs font-semibold uppercase tracking-wide text-slate-400">
             Admin console
@@ -187,7 +189,7 @@ export function DashboardShell() {
         </div>
       </aside>
 
-      <main className="min-w-0 px-4 py-6 sm:px-6 lg:px-8">
+      <main className="min-w-0 px-4 py-6 pb-24 sm:px-6 lg:px-8">
         <Outlet />
       </main>
     </div>
